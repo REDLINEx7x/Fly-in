@@ -18,14 +18,14 @@ debug:
 	$(PY) -m pdb $(MAIN) $(FILE)
 
 lint:
-	$(VENV)/bin/flake8 .
-	$(VENV)/bin/mypy . --warn-return-any --warn-unused-ignores \
+		flake8 .
+		mypy . --warn-return-any --warn-unused-ignores \
 		--ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs
 
 lint-strict:
-	$(VENV)/bin/flake8 .
-	$(VENV)/bin/mypy . --strict
+	flake8 .
+	mypy . --strict
 
 clean:
 	rm -rf __pycache__ .mypy_cache $(VENV)
