@@ -1,0 +1,40 @@
+from objects import Zone, Drone, Connection, Graph
+from typing import Any, Optional
+import heapq
+
+
+class Solver:
+    def __init__(self, graph):
+
+        self.graph = graph
+
+    def find_path(self, start, end):
+
+        dist_cost = {zone_name: float("inf") for zone_name in self.graph.all_zones}
+        dist_cost[start.name] = 0
+        previous = {}
+        queue = [(0, start)]
+        while queue:
+            curr_cost, curr_zone = heapq.heappop(queue)
+            print(f"Checking {curr_zone.name}...")
+            if curr_zone == end:
+                return self._rebuild_path(previous, curr_zone)
+            if curr_cost > dist_cost[curr_zone.name]:
+                continue
+            for neighbor in self.graph.get_neighbors(curr_zone):
+                new_cost = curr_cost + neighbor.movement_cost()
+
+                if new_cost < dist_cost[neighbor.name]:
+                    dist_cost[neighbor.name] = new_cost
+                    previous[neighbor.name] = curr_zone
+                    heapq.heappush(queue, (new_cost, neighbor))
+
+        return []
+
+    def _rebuild_path(self, previous, current_zone):
+
+        path = []
+        while current_zone is not None:
+            path.append(current_zone)
+            current_zone = previous.get(current_zone.name)
+        return path[::-1]

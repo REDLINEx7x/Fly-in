@@ -1,23 +1,24 @@
 from typing import Any, Optional
 from parser import Parser
-from models import ZoneParse, ConnectionParse
-from models import ZoneType
+from validation import ZoneParse, ConnectionParse
+from validation import ZoneType
 
 
 class Drone:
-    def __iniy__(self, drone_id, current_zone):
+
+    def __init__(self, drone_id, current_zone):
         self.drone_id = drone_id
         self.current_zone: Zone = current_zone
-        start
-        path: list[Zone]
-        in_transit: bool = False
-        transit_turns_left: int = 0
+        self.path: list[Zone] = []
+        self.in_transit: bool = False
+        self.transit_turns_left: int = 0
 
-    def has_arrived(end_zone):
+    def has_arrived(self, end_zone):
         return self.current_zone == end_zone
 
 
 class Graph:
+
     def __init__(self, all_zones, connections, start, end, n_drones):
 
         self.all_zones = all_zones
@@ -27,16 +28,25 @@ class Graph:
         self.n_drones = n_drones
 
     @classmethod
-    def from_parsed(cls, parsed: Parser) -> Graph:
+    def from_parsed(cls, parsed: Parser) -> "Graph":
+
+        logic_zones = {}
+        for name, z in parsed.zones.items():
+            logic_zones[name] = Zone.from_parsed(z)
+
+        logic_connections = []
+
+        for con in parsed.connections:
+            logic_connections.append(Connection.from_parsed(con, logic_zones))
         return cls(
-            all_zones=parsed.zones.items(),
-            connections=parsed.connections,
-            start=parsed.start_v.name,
-            end=parsed.end_v.name,
-            n_drones=parsed.n_drones,
+            all_zones=logic_zones,
+            connections=logic_connections,
+            start=logic_zones[parsed.start_v.name],
+            end=logic_zones[parsed.end_v.name],
+            n_drones=parsed.drones,
         )
 
-    def get_neighbos(self, zone):
+    def get_neighbors(self, zone):
 
         good_neighbors = []
 
@@ -55,7 +65,7 @@ class Graph:
         for con in self.connections:
             if con.connected(a) and con.connected(b):
                 return con
-            return None
+        return None
 
 
 class Zone:
@@ -68,10 +78,9 @@ class Zone:
         self.y = y
         self.color = color
         self.max_drones = max_drones
-        self.neighbors = []
 
     @classmethod
-    def from_parsed(cls, parsed: ZoneParse) -> Zone:
+    def from_parsed(cls, parsed: ZoneParse) -> "Zone":
 
         return cls(
             name=parsed.name,
@@ -82,14 +91,13 @@ class Zone:
             max_drones=int(parsed.metadata.get("max_drones", 1)),
         )
 
-        def is_blocked(self) -> bool:
-            return self.zone_type == ZoneType.BLOCKED
+    def is_blocked(self) -> bool:
+        return self.zone_type == ZoneType.BLOCKED
 
-        def movement_cost(self) -> int:
-
-            if self.zone_type == ZoneType.RESTRICTED:
-                return 2
-            return 1
+    def movement_cost(self) -> int:
+        if self.zone_type == ZoneType.RESTRICTED:
+            return 2
+        return 1
 
 
 class Connection:
@@ -101,11 +109,21 @@ class Connection:
         self.max_capacity = max_capacity
 
     @classmethod
-    def from_parsed(cls, parsed: ConnectionParse) -> Connection:
+    def from_parsed(
+        cls, parsed: ConnectionParse, zone_map: dict[str, Zone]
+    ) -> "Connection":
 
+        zone_a = zone_map.get(parsed.from_zone)
+        zone_b = zone_map.get(parsed.to_zone)
+
+        if not zone_a or not zone_b:
+            raise ValueError(
+                f"Connection error: One of the zones ({parsed.from_zone} or {parsed.to_zone}) not found in zone_map"
+            )
         return cls(
-            zone_a=parsed.from_zone,
-            zone_b=parsed.to_zone,
+            zone_a=zone_a,
+            zone_b=zone_b,
+            max_capacity=int(parsed.metadata.get("max_capacity", 1)),
         )
 
     def connected(self, zone):
@@ -116,8 +134,8 @@ class Connection:
 
     def find_other(self, zone):
 
-        if zone == zone_a:
-            return zone_b
-        if zone == zone_b:
-            return zone_a
+        if zone == self.zone_a:
+            return self.zone_b
+        if zone == self.zone_b:
+            return self.zone_a
         return None

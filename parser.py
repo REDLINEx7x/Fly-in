@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Any
-from models import DroneParse, ZoneParse, ConnectionParse, ZoneType
+from validation import DroneParse, ZoneParse, ConnectionParse, ZoneType
 import re
 
 
@@ -8,7 +8,7 @@ class Parser:
     def __init__(self, file_path: str):
         self.path_config = file_path
         self.drones: int = 0
-        self.zones: dict[str:ZoneParse] = {}
+        self.zones: dict[str, ZoneParse] = {}
         self.connections: list[ConnectionParse] = []
         self.start_v: Optional[ZoneParse] = None
         self.end_v: Optional[ZoneParse] = None
