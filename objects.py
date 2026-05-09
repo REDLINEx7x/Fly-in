@@ -12,6 +12,8 @@ class Drone:
         self.path: list[Zone] = []
         self.in_transit: bool = False
         self.transit_turns_left: int = 0
+        self.delivered: bool = False
+        self.transit_target: Zone | None
 
     def has_arrived(self, end_zone):
         return self.current_zone == end_zone
@@ -78,6 +80,7 @@ class Zone:
         self.y = y
         self.color = color
         self.max_drones = max_drones
+        self.current_drones = 0
 
     @classmethod
     def from_parsed(cls, parsed: ZoneParse) -> "Zone":
@@ -96,17 +99,24 @@ class Zone:
 
     def movement_cost(self) -> int:
         if self.zone_type == ZoneType.RESTRICTED:
-            return 2
-        return 1
+            return 2.0
+        if self.zone_type == ZoneType.PRIORITY:
+            return 0.9
+        if self.zone_type == ZoneType.NORMAL:
+            return 1.0
 
 
 class Connection:
 
-    def __init__(self, zone_a, zone_b, max_capacity):
+    def __init__(self, zone_a, zone_b, max_link_capacity):
 
         self.zone_a = zone_a
         self.zone_b = zone_b
-        self.max_capacity = max_capacity
+        self.max_link_capacity = max_link_capacity
+
+    @property
+    def name(self) -> str:
+        return f"{self.zone_a.name}-{self.zone_b.name}"
 
     @classmethod
     def from_parsed(
@@ -123,7 +133,7 @@ class Connection:
         return cls(
             zone_a=zone_a,
             zone_b=zone_b,
-            max_capacity=int(parsed.metadata.get("max_capacity", 1)),
+            max_link_capacity=int(parsed.metadata.get("max_link_capacity", 1)),
         )
 
     def connected(self, zone):
