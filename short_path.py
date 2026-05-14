@@ -13,7 +13,7 @@ class Solver:
         dist_cost = {zone_name: float("inf") for zone_name in self.graph.all_zones}
         dist_cost[start.name] = 0
         previous = {}
-        queue = [(0, 0, start)] # (cost, turn, zone_object)
+        queue = [(0, start)] # (cost, turn, zone_object)
         while queue:
             curr_cost, curr_zone = heapq.heappop(queue)
             print(f"Checking {curr_zone.name}...")
@@ -56,4 +56,4 @@ class Solver:
             exclude.update(z.name for z in path[1:-1])
         return paths
 
-    
+
