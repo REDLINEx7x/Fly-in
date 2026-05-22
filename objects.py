@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from parser import Parser
+from map_parser import Parser
 from validation import ZoneParse, ConnectionParse
 from validation import ZoneType
 

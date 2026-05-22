@@ -8,18 +8,26 @@ class Solver:
 
         self.graph = graph
 
-    def find_path(self, start, end, exclude):
+    def find_path(
+        self,
+        start: Zone,
+        end: Zone,
+        exclude: set[str] | None = None
+    ) -> list[Zone]:
+
+        if exclude is None:
+            exclude = set()
 
         dist_cost = {zone_name: float("inf") for zone_name in self.graph.all_zones}
         dist_cost[start.name] = 0
         previous = {}
-        queue = [(0, start)] # (cost, turn, zone_object)
+        queue = [(0, start.name)] # (cost, turn, zone_object)
         while queue:
-            curr_cost, curr_zone = heapq.heappop(queue)
-            print(f"Checking {curr_zone.name}...")
+            curr_cost, curr_zone_name = heapq.heappop(queue)
+            curr_zone = self.graph.all_zones[curr_zone_name]
             if curr_zone == end:
                 return self._rebuild_path(previous, curr_zone)
-            if curr_cost > dist_cost[curr_zone.name]:
+            if curr_cost > dist_cost[curr_zone_name]:
                 continue
             for neighbor in self.graph.get_neighbors(curr_zone):
                 if neighbor.name in exclude:
@@ -30,7 +38,7 @@ class Solver:
                 if new_cost < dist_cost[neighbor.name]:
                     dist_cost[neighbor.name] = new_cost
                     previous[neighbor.name] = curr_zone
-                    heapq.heappush(queue, (new_cost, neighbor))
+                    heapq.heappush(queue, (new_cost, neighbor.name))
 
         return []
 

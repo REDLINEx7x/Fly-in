@@ -1,0 +1,67 @@
+import sys
+from map_parser import Parser
+from simulation import SimulationManager
+from short_path import Solver
+from objects import Graph
+
+class Flyin:
+    def __init__(self, filepath):
+
+        self.filepath = filepath
+        self.parser: Parser | None = None
+        self.graph: Graph | None = None
+        self.simulation: SimulationManager | None = None
+    @classmethod
+    def start(cls, av: list[str]):
+
+        try:
+            if len(av) == 2:
+                filepath = av[1]
+                main = Flyin(filepath)
+                main._parse()
+                main._build_graph()
+                main._run()
+            else:
+                print("Usage: python3 main.py <map_filepath>")
+                sys.exit(1)
+        except Exception as e:
+            print(f"Application Error: {e}")
+            sys.exit(1)
+
+    def _parse(self):
+
+        try:
+            self.parser = Parser(self.filepath)
+            self.parser.read_file()
+        except FileNotFoundError:
+            raise ValueError(f"file '{self.filepath}' not found")
+        except Exception as e:
+            raise ValueError(f"Parsing failed: {e}")
+
+
+    def _build_graph(self):
+
+        if not self.parser:
+            raise ValueError("Parser is not initialized.")
+        try:
+            self.graph = Graph.from_parsed(self.parser)
+            if not self.graph:
+                raise ValueError("Graph construction failed.")
+            solver  = Solver(self.graph)
+            self.simulation = SimulationManager(self.graph, solver)
+        except Exception as e:
+            raise ValueError(f"Graph/Solver building failed: {e}")
+
+
+    def _run(self):
+        turn_save = []
+        if not self.simulation:
+            raise ValueError("Simulation is not initialized.")
+
+        try:
+            turn_save = self.simulation.run_simulation()
+        except Exception as e:
+            raise ValueError(f"Simulation crash: {e}")
+
+if __name__ == "__main__":
+    Flyin.start(sys.argv)
