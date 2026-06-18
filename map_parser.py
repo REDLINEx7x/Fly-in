@@ -14,7 +14,7 @@ class Parser:
         self.end_v: Optional[ZoneParse] = None
         self.drones_line = False
 
-    def extract_metadata(self, line: str):
+    def extract_metadata(self, line: str, line_num : int):
 
         match = re.search(r"\[(.*?)\]", line)
         clean_line = line
@@ -24,11 +24,12 @@ class Parser:
             meta_data = match.group(1)
             clean_line = line.replace(match.group(0), "").strip()
 
-            metadata_dict = {
-                item.split("=")[0]: item.split("=")[1]
-                for item in meta_data.split()
-                if "=" in item
-            }
+            for item in meta_data.split():
+                if "=" not in item:
+                    raise ValueError(f"Metadata format is not valid for item: '{item}'. Expected 'key=value'.")
+
+                key, value = item.split("=", 1)
+                metadata_dict[key] = value
 
         return clean_line, metadata_dict
 
@@ -55,18 +56,19 @@ class Parser:
         prefix = extract[0]
         start_flag = prefix == "start_hub:"
         end_flag = prefix == "end_hub:"
+        try:
 
-        z_type = metadata_dict.get("zone", "normal")
-        zone = ZoneParse(
-            name=extract[1],
-            x=extract[2],
-            y=extract[3],
-            metadata=metadata_dict,
-            is_start=start_flag,
-            is_end=end_flag,
-            zone_type=ZoneType(z_type),
-        )
-        # print(zone.zone_type.value)
+            metadata_obj = ZoneMetadata(**metadata_dict)
+            zone = ZoneParse(
+                name=extract[1],
+                x=extract[2],
+                y=extract[3],
+                metadata=metadata_obj,
+                is_start=start_flag,
+                is_end=end_flag,
+            )
+        except:
+            
 
         if zone.name in self.zones:
             raise ValueError(f"Duplicate zone name: {zone.name} in line {line_num}")

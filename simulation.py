@@ -1,6 +1,7 @@
 from objects import Drone, Zone, Graph, Connection
 from validation import ZoneType
 
+
 class SimulationManager:
 
     def __init__(self, graph, solver):
@@ -8,7 +9,7 @@ class SimulationManager:
         self.graph = graph
         self.drones: list[Drone] = []
         self.solver = solver
-        #self.turn_save: list[str] = []
+        # self.turn_save: list[str] = []
 
     def setup(self):
 
@@ -30,9 +31,11 @@ class SimulationManager:
             self.start_moves(planned)
             if all(drone.delivered for drone in self.drones):
                 break
-            full_out = self.build_output_line(list(output_transit + output_moves))
-            self.deadlock(full_out)
+            full_out = self.output_line(list(output_transit + output_moves))
+            print(full_out)
+            self.check_deadlock(full_out)
             logs.append(full_out)
+        print(logs)
         return logs
 
     def resolve_transit(self):
@@ -124,30 +127,30 @@ class SimulationManager:
                 drone.in_transit = True
                 drone.transit_turns_left = 2
                 drone.transit_target = next_zone
-                drone.path.popleft()
+                drone.path.pop(0)
             else:
                 drone.current_zone = next_zone
-                drone.path.popleft()
+                drone.path.pop(0)
             if drone.current_zone == self.graph.end:
                 drone.delivered = True
                 drone.current_zone.current_drones -= 1
 
-        def output_line(self, full_output: list[str]):
+    def output_line(self, full_output: list[str]):
 
-            if not full_output:
-                return ""
+        if not full_output:
+            return ""
 
-            line = " ".join(full_output)
-            return line
+        line = " ".join(full_output)
+        return line
 
-        def check_deadlock(self, output_str):
+    def check_deadlock(self, output_str):
 
-            if output_str.strip() != "":
-                return
-            is_anyone_moving = any(drone.in_transit for drone in self.drones)
-            is_everyone_delivered = all(drone.delivered for drone in self.drones)
+        if output_str.strip() != "":
+            return
+        is_anyone_moving = any(drone.in_transit for drone in self.drones)
+        is_everyone_delivered = all(drone.delivered for drone in self.drones)
 
-            if not is_anyone_moving and not is_everyone_delivered:
-                raise ValueError(
-                    "ERROR: deadlock happened - No moves possible and no drones in transit."
-                )
+        if not is_anyone_moving and not is_everyone_delivered:
+            raise ValueError(
+                "ERROR: deadlock happened - No moves possible and no drones in transit."
+            )
