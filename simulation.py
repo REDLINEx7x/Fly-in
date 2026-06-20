@@ -9,7 +9,6 @@ class SimulationManager:
         self.graph = graph
         self.drones: list[Drone] = []
         self.solver = solver
-        # self.turn_save: list[str] = []
 
     def setup(self):
 
@@ -19,6 +18,7 @@ class SimulationManager:
             selected_path = paths[i % len(paths)]
             drone.path = list(selected_path[1:])
             self.drones.append(drone)
+        print(id(self.drones[1].path), id(self.drones[0].path))
 
     def run_simulation(self):
 
@@ -29,10 +29,7 @@ class SimulationManager:
             occupancy = self.zone_occupancy()
             planned, output_moves = self.decide_moves(occupancy)
             self.start_moves(planned)
-            if all(drone.delivered for drone in self.drones):
-                break
             full_out = self.output_line(list(output_transit + output_moves))
-            print(full_out)
             self.check_deadlock(full_out)
             logs.append(full_out)
         print(logs)
@@ -115,8 +112,9 @@ class SimulationManager:
 
             planned_moves.append((drone, next_zone))
             occupancy[next_zone.name] = occupancy.get(next_zone.name, 0) + 1
+            occupancy[drone.current_zone.name] = occupancy.get(drone.current_zone.name, 0) - 1
             con_usage[con_key] = curr_con_usage + 1
-
+        #print(output_str)
         return planned_moves, output_str
 
     def start_moves(self, planned_moves):
@@ -133,7 +131,7 @@ class SimulationManager:
                 drone.path.pop(0)
             if drone.current_zone == self.graph.end:
                 drone.delivered = True
-                drone.current_zone.current_drones -= 1
+                #drone.current_zone.current_drones -= 1
 
     def output_line(self, full_output: list[str]):
 

@@ -1,13 +1,11 @@
-# Configuration
-nb_drones:nb
+# Easy Level 3: Basic capacity management
+nb_drones: 4
 
-# Hubs
-start_hub: start 0 0 [color=green]
-hub: waypoint1 1 0 [color=blue]
-hub: waypoint2 2 0 [color=blue max_drones=10]
-end_hub: goal 3 0 [max_drones=10]
+start_hub: start 0 0 [color=green max_drones=4]
+hub: bottleneck 1 0 [color=orange max_drones=2]
+hub: wide_area 2 0 [color=blue max_drones=3]
+end_hub: goal 3 0 [color=red max_drones=4]
 
-# Connections
-connection: start-waypoint1
-connection: waypoint1-waypoint2 [max_link_capacity=2]
-connection: waypoint2-goal
+connection: start-bottleneck
+connection: bottleneck-wide_area
+connection: wide_area-goal

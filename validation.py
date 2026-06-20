@@ -2,12 +2,22 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from typing import Any
 
-
 class ZoneType(str, Enum):
     NORMAL = "normal"
     BLOCKED = "blocked"
     RESTRICTED = "restricted"
     PRIORITY = "priority"
+
+class ZoneMetadata(BaseModel):
+
+    zonetype: ZoneType = Field(default=ZoneType.NORMAL)
+    color: str = Field(default=None)
+    max_drones: int = Field(default=1, ge=1)
+
+class ConnectionMetadata(BaseModel):
+
+    max_link_capacity: int = Field(default=1, ge=1)
+
 
 
 class DroneParse(BaseModel):
@@ -31,15 +41,4 @@ class ConnectionParse(BaseModel):
     from_zone: str = Field(..., min_length=1)
     to_zone: str = Field(..., min_length=1)
     metadata: ConnectionMetadata = Field(default_factory=ConnectionMetadata)
-
-class ZoneMetadata(BaseModel):
-
-    zonetype: ZoneType = Field(default=ZoneType.NORMAL)
-    color: str = Field(default=None)
-    max_drones: int = Field(default=1, ge=1)
-
-
-class ConnectionMetadata(BaseModel):
-
-    max_link_capacity: int = Field(default=1, ge=1)
 

@@ -89,9 +89,9 @@ class Zone:
             name=parsed.name,
             x=parsed.x,
             y=parsed.y,
-            zone_type=parsed.zone_type,
-            color=parsed.metadata.get("color", None),
-            max_drones=int(parsed.metadata.get("max_drones", 1)),
+            zone_type=parsed.metadata.zonetype,
+            color=parsed.metadata.color,
+            max_drones=parsed.metadata.max_drones,
         )
 
     def is_blocked(self) -> bool:
@@ -133,7 +133,7 @@ class Connection:
         return cls(
             zone_a=zone_a,
             zone_b=zone_b,
-            max_link_capacity=int(parsed.metadata.get("max_link_capacity", 1)),
+            max_link_capacity=parsed.metadata.max_link_capacity
         )
 
     def connected(self, zone):

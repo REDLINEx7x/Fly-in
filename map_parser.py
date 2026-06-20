@@ -1,6 +1,9 @@
-from pydantic import BaseModel, Field
+from validation import (
+    DroneParse, ZoneParse, ConnectionParse, ZoneType,
+    ZoneMetadata, ConnectionMetadata,
+)
+from pydantic import ValidationError
 from typing import Optional, Any
-from validation import DroneParse, ZoneParse, ConnectionParse, ZoneType
 import re
 
 
@@ -10,6 +13,7 @@ class Parser:
         self.drones: int = 0
         self.zones: dict[str, ZoneParse] = {}
         self.connections: list[ConnectionParse] = []
+        self.seen_connections: set[frozenset[str]] = set()
         self.start_v: Optional[ZoneParse] = None
         self.end_v: Optional[ZoneParse] = None
         self.drones_line = False
@@ -37,8 +41,14 @@ class Parser:
 
         if line.startswith("nb_drones:"):
             splited = line.split(":")
+            if not len(splited) == 2:
+                raise ValueError(f"Line {line_num} invalid drones format")
+
             val = splited[1].strip()
-            parsed_drones = DroneParse(value=val)
+            try:
+                parsed_drones = DroneParse(value=val)
+            except ValidationError as e:
+                raise ValueError(f"Line {line_num}: Drone validation failed. Details: {e}")
             self.drones = parsed_drones.value
             self.drones_line = True
         else:
@@ -46,7 +56,7 @@ class Parser:
 
     def parse_zone(self, line: str, line_num: int):
 
-        clean_line, metadata_dict = self.extract_metadata(line)
+        clean_line, metadata_dict = self.extract_metadata(line, line_num)
 
         extract = clean_line.split()
 
@@ -57,7 +67,6 @@ class Parser:
         start_flag = prefix == "start_hub:"
         end_flag = prefix == "end_hub:"
         try:
-
             metadata_obj = ZoneMetadata(**metadata_dict)
             zone = ZoneParse(
                 name=extract[1],
@@ -66,10 +75,10 @@ class Parser:
                 metadata=metadata_obj,
                 is_start=start_flag,
                 is_end=end_flag,
+                zone_type=metadata_obj.zonetype
             )
-        except:
-            
-
+        except ValidationError as e:
+            raise ValueError(f"Line {line_num}: Zone validation failed. Details: {e}")
         if zone.name in self.zones:
             raise ValueError(f"Duplicate zone name: {zone.name} in line {line_num}")
         if " " in zone.name or "-" in zone.name:
@@ -91,12 +100,12 @@ class Parser:
 
     def parse_connection(self, line: str, line_num):
 
-        clean_line, metadata_dict = self.extract_metadata(line)
+        clean_line, metadata_dict = self.extract_metadata(line, line_num)
 
         extract = clean_line.split()
 
         if len(extract) != 2:
-            raise ValueError(f"line {line_num} invalid connection format")
+            raise ValueError(f"Line {line_num} invalid connection format")
 
         parts = extract[1]
 
@@ -104,7 +113,8 @@ class Parser:
             raise ValueError(
                 f"Invalid connection format: {parts}. Expected 'zone1-zone2'"
             )
-
+        if parts.count("-") > 1:
+            raise ValueError(f"Line {line_num} invalid connection format")
         zon1, zon2 = parts.split("-")
 
         if zon1 not in self.zones or zon2 not in self.zones:
@@ -115,9 +125,18 @@ class Parser:
         if zon1 == zon2:
             raise ValueError(f"line {line_num} self-connection detected: {zon1}")
 
-        connection = ConnectionParse(
-            from_zone=zon1, to_zone=zon2, metadata=metadata_dict
-        )
+        current_pair = frozenset({zon1, zon2})
+        if current_pair in self.seen_connections:
+            raise ValueError(f"Line {line_num}: Duplicate connection found between {zon1} and {zon2}")
+        else:
+            self.seen_connections.add(current_pair)
+        try:
+            metadata_obj = ConnectionMetadata(**metadata_dict)
+            connection = ConnectionParse(
+            from_zone=zon1, to_zone=zon2, metadata=metadata_obj
+            )
+        except ValidationError as e:
+            raise ValueError(f"Line {line_num}: Connection validation failed. Details: {e}")
 
         self.connections.append(connection)
 
