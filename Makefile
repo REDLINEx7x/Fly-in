@@ -3,6 +3,7 @@ MAIN = fly-in.py
 VENV = venv
 PIP = $(VENV)/bin/pip
 PY = $(VENV)/bin/python
+FILE = map.txt
 
 all: install
 

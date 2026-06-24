@@ -21,7 +21,7 @@ class ZoneMetadata(BaseModel):
 class ConnectionMetadata(BaseModel):
     """Metadata for connection configuration."""
 
-    max_link_capacity: int = Field(default=1, ge=1)
+    max_link_capacity: int = Field(default=1, )
 
 
 class DroneParse(BaseModel):

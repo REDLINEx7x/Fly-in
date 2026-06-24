@@ -16,6 +16,15 @@ class Solver:
         """
         self.graph = graph
 
+    def priority_sort(self, zones: list[Zone]) -> list[Zone]:
+        """
+        Sort zones to prefer priority zones first.
+
+        """
+        priority_zones = [z for z in zones if z.zone_type == "priority"]
+        other_zones = [z for z in zones if z.zone_type != "priority"]
+        return priority_zones + other_zones
+
     def find_path(
         self,
         start: Zone,
@@ -52,7 +61,10 @@ class Solver:
             if curr_cost > dist_cost[curr_zone_name]:
                 continue
 
-            for neighbor in self.graph.get_neighbors(curr_zone):
+            neighbors = [n for n in self.graph.get_neighbors(curr_zone)]
+            sort_neibghbors = self.priority_sort(neighbors)
+
+            for neighbor in sort_neibghbors:
                 if neighbor.name in exclude:
                     continue
                 new_cost = curr_cost + neighbor.movement_cost()
