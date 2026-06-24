@@ -1,0 +1,39 @@
+# Medium 3: Priority puzzle with 4 drones
+# Target: <= 12 turns
+# Priority zones should be preferred over longer normal routes
+nb_drones: 4
+
+start_hub: start 0 2 [color=green max_drones=4]
+end_hub: goal 6 2 [color=red max_drones=4]
+
+hub: split 1 2 [color=cyan max_drones=2]
+
+hub: normal_a1 2 0 [color=gray]
+hub: normal_a2 3 0 [color=gray]
+hub: normal_a3 4 0 [color=gray]
+hub: normal_a4 5 0 [color=gray]
+
+hub: priority_b1 2 2 [zone=priority color=yellow]
+hub: priority_b2 3 2 [zone=priority color=yellow]
+hub: priority_b3 4 2 [zone=priority color=yellow]
+
+hub: normal_c1 2 4 [color=gray]
+hub: normal_c2 3 4 [color=gray]
+hub: normal_c3 4 4 [color=gray]
+hub: normal_c4 5 4 [color=gray]
+
+connection: start-split
+connection: split-normal_a1
+connection: normal_a1-normal_a2
+connection: normal_a2-normal_a3
+connection: normal_a3-normal_a4
+connection: normal_a4-goal
+connection: split-priority_b1
+connection: priority_b1-priority_b2
+connection: priority_b2-priority_b3
+connection: priority_b3-goal
+connection: split-normal_c1
+connection: normal_c1-normal_c2
+connection: normal_c2-normal_c3
+connection: normal_c3-normal_c4
+connection: normal_c4-goal

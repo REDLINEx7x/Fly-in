@@ -1,5 +1,5 @@
 PYTHON = python3
-MAIN = main.py
+MAIN = fly-in.py
 VENV = venv
 PIP = $(VENV)/bin/pip
 PY = $(VENV)/bin/python
@@ -10,6 +10,7 @@ install:
 	$(PYTHON) -m venv $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install flake8 mypy colorama
+	$(PIP) install pydantic
 
 run:
 	$(PY) $(MAIN) $(FILE)

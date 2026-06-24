@@ -1,0 +1,77 @@
+# Hard 1: Maze nightmare with 8 drones
+# Target: <= 45 turns
+nb_drones: 8
+
+start_hub: start 0 4 [color=green max_drones=8]
+end_hub: goal 8 4 [color=red max_drones=8]
+
+hub: entry 1 4 [color=cyan max_drones=2]
+
+hub: a1 2 0 [color=blue]
+hub: a2 3 0 [zone=restricted color=orange]
+hub: a3 4 0 [color=blue]
+hub: a4 5 0 [zone=restricted color=orange]
+hub: a5 6 0 [color=blue]
+hub: a6 7 0 [color=blue]
+
+hub: b1 2 2 [color=yellow]
+hub: b2 3 2 [zone=blocked color=gray]
+hub: b3 4 2 [color=yellow]
+hub: b4 5 2 [color=yellow]
+hub: b5 6 2 [color=yellow]
+
+hub: c1 2 4 [color=blue]
+hub: c2 3 4 [color=blue]
+hub: c3 4 4 [zone=restricted color=orange]
+hub: c4 5 4 [color=blue]
+hub: c5 6 4 [color=blue]
+hub: c6 7 4 [color=blue]
+
+hub: d1 2 6 [color=yellow]
+hub: d2 3 6 [color=yellow]
+hub: d3 4 6 [zone=blocked color=gray]
+hub: d4 5 6 [color=yellow]
+hub: d5 6 6 [color=yellow]
+
+hub: e1 2 8 [color=blue]
+hub: e2 3 8 [zone=restricted color=orange]
+hub: e3 4 8 [color=blue]
+hub: e4 5 8 [color=blue]
+hub: e5 6 8 [color=blue]
+hub: e6 7 8 [color=blue]
+
+hub: exit 7 4 [color=cyan max_drones=2]
+
+connection: start-entry
+connection: entry-a1
+connection: entry-b1
+connection: entry-c1
+connection: entry-d1
+connection: entry-e1
+connection: a1-a2
+connection: a2-a3
+connection: a3-a4
+connection: a4-a5
+connection: a5-a6
+connection: a6-exit
+connection: b1-b3
+connection: b3-b4
+connection: b4-b5
+connection: b5-exit
+connection: c1-c2
+connection: c2-c3
+connection: c3-c4
+connection: c4-c5
+connection: c5-c6
+connection: c6-exit
+connection: d1-d2
+connection: d2-d4
+connection: d4-d5
+connection: d5-exit
+connection: e1-e2
+connection: e2-e3
+connection: e3-e4
+connection: e4-e5
+connection: e5-e6
+connection: e6-exit
+connection: exit-goal

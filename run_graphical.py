@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-run_graphical.py - Run Fly-in simulation with graphical visualization using Pygame
+run_graphical.py - Integrated graphical visualization with actual simulation
 
-Displays the network as a graph with animated drones.
+Runs the real simulation, collects history, and displays via Pygame GUI.
 """
 
 import sys
 import importlib.util
-
-from graphical_visualizer import GraphicalVisualizer
-from simulation import SimulationManager
+from map_parser import Parser
+from objects import Graph
 from short_path import Solver
+from simulation import SimulationManager
+from graphical_visualizer import GraphicalVisualizer
 
 def load_fly_in_module():
     """Load fly-in.py module (has hyphen in name)"""
@@ -20,45 +21,80 @@ def load_fly_in_module():
     return module
 
 def run_graphical(filepath: str):
-    """Run simulation with graphical visualization"""
+    """Run simulation and display graphically"""
+    
+    print("\n" + "="*80)
+    print("FLY-IN DRONE DELIVERY - GRAPHICAL VISUALIZATION".center(80))
+    print("="*80 + "\n")
     
     try:
-        # Load Flyin class
-        fly_in_module = load_fly_in_module()
-        Flyin = fly_in_module.Flyin
+        # 1. Parse the map file
+        print("📍 Parsing map file...")
+        parser = Parser(filepath)
+        parser.read_file()
         
-        # Initialize and parse
-        app = Flyin(filepath)
-        app._parse()
-        app._build_graph()
+        # 2. Build the graph
+        print("🔗 Building graph...")
+        graph = Graph.from_parsed(parser)
         
-        # Create graphical visualizer
-        visualizer = GraphicalVisualizer(app.graph, width=1200, height=800)
+        # 3. Create solver
+        print("🧭 Initializing pathfinding...")
+        solver = Solver(graph)
         
-        # Create simulation manager
-        sim = SimulationManager(app.graph, app.simulation.solver if hasattr(app.simulation, 'solver') else Solver(app.graph))
+        # 4. Create simulation manager
+        print("⚙️  Setting up simulation engine...")
+        sim = SimulationManager(graph, solver)
         
-        # Run simulation with visualization
+        # 5. Run simulation and collect history
+        print("🚁 Running simulation...\n")
+        
         sim.setup()
-        logs = []
+        simulation_history = []
         
+        turn_count = 0
         while not all(drone.delivered for drone in sim.drones):
-            # Run simulation step
+            turn_count += 1
+            
+            # Run one simulation step
             output_transit = sim.resolve_transit()
             occupancy = sim.zone_occupancy()
             planned, output_moves = sim.decide_moves(occupancy)
             sim.start_moves(planned)
             full_out = sim.output_line(list(output_transit + output_moves))
             sim.check_deadlock(full_out)
-            logs.append(full_out)
             
-            # Display this turn
-            if not visualizer.display_turn(sim.drones, logs):
-                break
+            # Collect turn data for visualization
+            turn_data = {
+                "turn": turn_count,
+                "logs": full_out.split() if full_out.strip() else ["No moves"],
+                "positions": {},
+                "status": {}
+            }
+            
+            # Record drone positions and status
+            for drone in sim.drones:
+                drone_id = f"D{drone.drone_id}"
+                turn_data["positions"][drone_id] = drone.current_zone.name
+                
+                # Drone status
+                if drone.delivered:
+                    turn_data["status"][drone_id] = "✓ DELIVERED"
+                elif drone.in_transit:
+                    turn_data["status"][drone_id] = f"⏳ IN TRANSIT ({drone.transit_turns_left})"
+                else:
+                    turn_data["status"][drone_id] = "→ MOVING"
+            
+            simulation_history.append(turn_data)
+            
+            # Print progress
+            print(f"  Turn {turn_count}: {full_out if full_out.strip() else 'No moves'}")
         
-        # Show final summary
-        visualizer.display_final_summary(sim.drones, logs)
-        visualizer.close()
+        print(f"\n✓ Simulation complete in {turn_count} turns!")
+        print("\n🎨 Launching graphical visualization...\n")
+        
+        # 6. Launch graphical visualizer
+        visualizer = GraphicalVisualizer(graph, simulation_history)
+        visualizer.run()
         
         return 0
         
@@ -72,7 +108,6 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python3 run_graphical.py <map_file>")
         print("Example: python3 run_graphical.py map.txt")
-        print("\nNote: Requires pygame. Install with: pip install pygame")
         sys.exit(1)
     
     filepath = sys.argv[1]

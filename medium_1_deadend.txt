@@ -1,0 +1,33 @@
+# Medium 1: Dead end trap with 5 drones
+# Target: <= 15 turns
+# Has blocked zones and dead ends to trap naive pathfinders
+nb_drones: 5
+
+start_hub: start 0 2 [color=green max_drones=5]
+end_hub: goal 6 2 [color=red max_drones=5]
+
+hub: junction 1 2 [color=cyan max_drones=2]
+
+hub: dead_a1 2 0 [color=gray]
+hub: dead_a2 3 0 [color=gray]
+hub: dead_end_a 4 0 [zone=blocked color=gray]
+
+hub: correct_b1 2 2 [color=blue]
+hub: correct_b2 3 2 [color=blue]
+hub: correct_b3 4 2 [color=blue]
+hub: correct_b4 5 2 [color=blue]
+
+hub: dead_c1 2 4 [color=gray]
+hub: dead_end_c 3 4 [zone=blocked color=gray]
+
+connection: start-junction
+connection: junction-dead_a1
+connection: dead_a1-dead_a2
+connection: dead_a2-dead_end_a
+connection: junction-correct_b1
+connection: correct_b1-correct_b2
+connection: correct_b2-correct_b3
+connection: correct_b3-correct_b4
+connection: correct_b4-goal
+connection: junction-dead_c1
+connection: dead_c1-dead_end_c

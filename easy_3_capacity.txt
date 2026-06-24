@@ -1,0 +1,20 @@
+# Easy 3: Basic capacity with 4 drones
+# Target: <= 8 turns
+nb_drones: 4
+
+start_hub: start 0 0 [color=green max_drones=4]
+end_hub: goal 6 0 [color=red max_drones=4]
+
+hub: entry 1 0 [color=cyan max_drones=2]
+hub: mid_a 2 0 [color=blue]
+hub: mid_b 3 0 [color=blue]
+hub: mid_c 4 0 [color=blue max_drones=2]
+hub: exit 5 0 [color=cyan max_drones=2]
+
+connection: start-entry [max_link_capacity=2]
+connection: entry-mid_a
+connection: entry-mid_b
+connection: mid_a-mid_c
+connection: mid_b-mid_c
+connection: mid_c-exit [max_link_capacity=2]
+connection: exit-goal

@@ -36,10 +36,10 @@ class Graph:
         for name, z in parsed.zones.items():
             logic_zones[name] = Zone.from_parsed(z)
 
-        logic_connections = []
-
-        for con in parsed.connections:
-            logic_connections.append(Connection.from_parsed(con, logic_zones))
+        logic_connections = [
+            Connection.from_parsed(con, logic_zones)
+            for con in parsed.connections
+        ]
         return cls(
             all_zones=logic_zones,
             connections=logic_connections,
@@ -99,11 +99,11 @@ class Zone:
 
     def movement_cost(self) -> int:
         if self.zone_type == ZoneType.RESTRICTED:
-            return 2.0
+            return 2
         if self.zone_type == ZoneType.PRIORITY:
-            return 0.9
+            return 1
         if self.zone_type == ZoneType.NORMAL:
-            return 1.0
+            return 1
 
 
 class Connection:

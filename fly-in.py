@@ -1,8 +1,10 @@
 import sys
+from terminal_output import Display
 from map_parser import Parser
 from simulation import SimulationManager
 from short_path import Solver
 from objects import Graph
+
 
 class Flyin:
     def __init__(self, filepath):
@@ -60,6 +62,7 @@ class Flyin:
 
         try:
             turn_save = self.simulation.run_simulation()
+            Display.display_full_log(turn_save, self.graph)
         except Exception as e:
             raise ValueError(f"Simulation crash: {e}")
 

@@ -13,12 +13,15 @@ class SimulationManager:
     def setup(self):
 
         paths = self.solver.find_all_paths(self.graph.start, self.graph.end)
+        #print(len(paths))
+        #for p in paths:
+        #    print([z.name for z in p])
         for i in range(self.graph.n_drones):
             drone = Drone(drone_id=i, current_zone=self.graph.start)
             selected_path = paths[i % len(paths)]
             drone.path = list(selected_path[1:])
             self.drones.append(drone)
-        print(id(self.drones[1].path), id(self.drones[0].path))
+        #print(id(self.drones[1].path), id(self.drones[0].path))
 
     def run_simulation(self):
 
@@ -32,7 +35,7 @@ class SimulationManager:
             full_out = self.output_line(list(output_transit + output_moves))
             self.check_deadlock(full_out)
             logs.append(full_out)
-        print(logs)
+        #print(logs)
         return logs
 
     def resolve_transit(self):
@@ -57,6 +60,7 @@ class SimulationManager:
                     drone.current_zone, drone.transit_target
                 )
                 arrive_output.append(f"D{drone.drone_id}-{connection.name}")
+            #print(arrive_output)
         return arrive_output
 
     def zone_occupancy(self):
@@ -123,7 +127,7 @@ class SimulationManager:
             drone.current_zone.current_drones -= 1
             if next_zone.zone_type == ZoneType.RESTRICTED:
                 drone.in_transit = True
-                drone.transit_turns_left = 2
+                drone.transit_turns_left = 1
                 drone.transit_target = next_zone
                 drone.path.pop(0)
             else:
@@ -141,8 +145,12 @@ class SimulationManager:
         line = " ".join(full_output)
         return line
 
-    def check_deadlock(self, output_str):
+    def check_deadlock(self, output_str: str) -> None:
+        """Raise an error if the simulation has stalled.
 
+        A deadlock occurs when no drone moved this turn, no drone is
+        currently in transit, and not all drones have been delivered.
+        """
         if output_str.strip() != "":
             return
         is_anyone_moving = any(drone.in_transit for drone in self.drones)

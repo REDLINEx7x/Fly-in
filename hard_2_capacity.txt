@@ -1,0 +1,58 @@
+# Hard 2: Capacity hell with 12 drones
+# Target: <= 60 turns
+# Tight capacity constraints throughout force careful scheduling
+nb_drones: 12
+
+start_hub: start 0 0 [color=green max_drones=12]
+end_hub: goal 8 0 [color=red max_drones=12]
+
+hub: gate_a 1 0 [color=cyan max_drones=2]
+hub: gate_b 1 2 [color=cyan max_drones=2]
+hub: gate_c 1 4 [color=cyan max_drones=2]
+
+hub: path_a1 2 0 [color=blue]
+hub: path_a2 3 0 [color=blue]
+hub: path_a3 4 0 [color=blue]
+hub: path_a4 5 0 [color=blue]
+hub: path_a5 6 0 [color=blue]
+
+hub: path_b1 2 2 [color=yellow]
+hub: path_b2 3 2 [zone=restricted color=orange]
+hub: path_b3 4 2 [color=yellow]
+hub: path_b4 5 2 [color=yellow]
+hub: path_b5 6 2 [color=yellow]
+
+hub: path_c1 2 4 [color=blue]
+hub: path_c2 3 4 [color=blue]
+hub: path_c3 4 4 [zone=restricted color=orange]
+hub: path_c4 5 4 [color=blue]
+hub: path_c5 6 4 [color=blue]
+
+hub: merge_a 7 0 [color=cyan max_drones=2]
+hub: merge_b 7 2 [color=cyan max_drones=2]
+hub: merge_c 7 4 [color=cyan max_drones=2]
+
+connection: start-gate_a [max_link_capacity=2]
+connection: start-gate_b [max_link_capacity=2]
+connection: start-gate_c [max_link_capacity=2]
+connection: gate_a-path_a1
+connection: path_a1-path_a2
+connection: path_a2-path_a3
+connection: path_a3-path_a4
+connection: path_a4-path_a5
+connection: path_a5-merge_a
+connection: gate_b-path_b1
+connection: path_b1-path_b2
+connection: path_b2-path_b3
+connection: path_b3-path_b4
+connection: path_b4-path_b5
+connection: path_b5-merge_b
+connection: gate_c-path_c1
+connection: path_c1-path_c2
+connection: path_c2-path_c3
+connection: path_c3-path_c4
+connection: path_c4-path_c5
+connection: path_c5-merge_c
+connection: merge_a-goal [max_link_capacity=2]
+connection: merge_b-goal [max_link_capacity=2]
+connection: merge_c-goal [max_link_capacity=2]
