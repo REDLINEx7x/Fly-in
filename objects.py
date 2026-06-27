@@ -1,7 +1,5 @@
-from typing import Any, Optional
 from map_parser import Parser
-from validation import ZoneParse, ConnectionParse
-from validation import ZoneType
+from validation import ZoneParse, ConnectionParse, ZoneType
 
 
 class Drone:
@@ -37,8 +35,7 @@ class Graph:
             logic_zones[name] = Zone.from_parsed(z)
 
         logic_connections = [
-            Connection.from_parsed(con, logic_zones)
-            for con in parsed.connections
+            Connection.from_parsed(con, logic_zones) for con in parsed.connections
         ]
         return cls(
             all_zones=logic_zones,
@@ -89,7 +86,7 @@ class Zone:
             name=parsed.name,
             x=parsed.x,
             y=parsed.y,
-            zone_type=parsed.metadata.zonetype,
+            zone_type=parsed.metadata.zone,
             color=parsed.metadata.color,
             max_drones=parsed.metadata.max_drones,
         )
@@ -98,12 +95,10 @@ class Zone:
         return self.zone_type == ZoneType.BLOCKED
 
     def movement_cost(self) -> int:
+        """Return movement cost for this zone based on type."""
         if self.zone_type == ZoneType.RESTRICTED:
             return 2
-        if self.zone_type == ZoneType.PRIORITY:
-            return 1
-        if self.zone_type == ZoneType.NORMAL:
-            return 1
+        return 1
 
 
 class Connection:
@@ -133,7 +128,7 @@ class Connection:
         return cls(
             zone_a=zone_a,
             zone_b=zone_b,
-            max_link_capacity=parsed.metadata.max_link_capacity
+            max_link_capacity=parsed.metadata.max_link_capacity,
         )
 
     def connected(self, zone):

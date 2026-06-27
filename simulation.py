@@ -13,15 +13,15 @@ class SimulationManager:
     def setup(self):
 
         paths = self.solver.find_all_paths(self.graph.start, self.graph.end)
-        #print(len(paths))
-        #for p in paths:
+        # print(len(paths))
+        # for p in paths:
         #    print([z.name for z in p])
         for i in range(self.graph.n_drones):
             drone = Drone(drone_id=i, current_zone=self.graph.start)
             selected_path = paths[i % len(paths)]
             drone.path = list(selected_path[1:])
             self.drones.append(drone)
-        #print(id(self.drones[1].path), id(self.drones[0].path))
+        # print(id(self.drones[1].path), id(self.drones[0].path))
 
     def run_simulation(self):
 
@@ -35,7 +35,7 @@ class SimulationManager:
             full_out = self.output_line(list(output_transit + output_moves))
             self.check_deadlock(full_out)
             logs.append(full_out)
-        #print(logs)
+        print(logs)
         return logs
 
     def resolve_transit(self):
@@ -60,7 +60,7 @@ class SimulationManager:
                     drone.current_zone, drone.transit_target
                 )
                 arrive_output.append(f"D{drone.drone_id}-{connection.name}")
-            #print(arrive_output)
+            # print(arrive_output)
         return arrive_output
 
     def zone_occupancy(self):
@@ -116,9 +116,11 @@ class SimulationManager:
 
             planned_moves.append((drone, next_zone))
             occupancy[next_zone.name] = occupancy.get(next_zone.name, 0) + 1
-            occupancy[drone.current_zone.name] = occupancy.get(drone.current_zone.name, 0) - 1
+            occupancy[drone.current_zone.name] = (
+                occupancy.get(drone.current_zone.name, 0) - 1
+            )
             con_usage[con_key] = curr_con_usage + 1
-        #print(output_str)
+        # print(output_str)
         return planned_moves, output_str
 
     def start_moves(self, planned_moves):
@@ -135,7 +137,7 @@ class SimulationManager:
                 drone.path.pop(0)
             if drone.current_zone == self.graph.end:
                 drone.delivered = True
-                #drone.current_zone.current_drones -= 1
+                # drone.current_zone.current_drones -= 1
 
     def output_line(self, full_output: list[str]):
 

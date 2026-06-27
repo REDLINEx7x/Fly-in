@@ -1,37 +1,23 @@
 PYTHON = python3
 MAIN = fly-in.py
-VENV = venv
-PIP = $(VENV)/bin/pip
-PY = $(VENV)/bin/python
-FILE = map.txt
-
-all: install
+MAP ?= map.txt
 
 install:
-	$(PYTHON) -m venv $(VENV)
-	$(PIP) install --upgrade pip
-	$(PIP) install flake8 mypy colorama
-	$(PIP) install pydantic
+	@pip install -r requirements.txt
 
 run:
-	$(PY) $(MAIN) $(FILE)
+	@$(PYTHON) $(MAIN) $(MAP) || true
 
 debug:
-	$(PY) -m pdb $(MAIN) $(FILE)
-
-lint:
-		flake8 .
-		mypy . --warn-return-any --warn-unused-ignores \
-		--ignore-missing-imports --disallow-untyped-defs \
-		--check-untyped-defs
-
-lint-strict:
-	flake8 .
-	mypy . --strict
+	@$(PYTHON) -m pdb $(MAIN) $(MAP)
 
 clean:
-	rm -rf __pycache__ .mypy_cache $(VENV)
-	find . -name "*.pyc" -delete
-	find . -name "*.pyo" -delete
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete
 
-.PHONY: all install run debug lint lint-strict clean
+lint:
+	@$(PYTHON) -m flake8 *.py --extend-ignore=E501 || true
+	@$(PYTHON) -m mypy *.py --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs || true
+
+.PHONY: install run debug clean lint

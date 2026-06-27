@@ -4,7 +4,6 @@ from typing import Optional
 
 from objects import Graph
 
-
 RESET: str = "\033[0m"
 
 COLOR_MAP: dict[str, str] = {
@@ -19,27 +18,30 @@ COLOR_MAP: dict[str, str] = {
     "gray": "\033[90m",
     "grey": "\033[90m",
     "orange": "\033[38;5;208m",
-
-    # New Colors extracted from the Nightmare Map
-    "purple": "\033[38;5;129m",      # Deep purple (Maze traps)
-    "black": "\033[30m",             # True black (Dead ends)
-    "brown": "\033[38;5;94m",        # Sandy brown (Restricted loops)
-    "maroon": "\033[38;5;88m",       # Dark maroon (Overflow hell)
-    "gold": "\033[38;5;220m",        # Bright gold (False hope priority zones)
-    "darkred": "\033[38;5;52m",      # Wine dark-red (Convergence hell)
-    "violet": "\033[38;5;135m",      # Light violet (Final merge)
-    "crimson": "\033[38;5;197m",     # Intense crimson (Final gauntlet torture)
-    "rainbow": "\033[38;5;201m",     # Neon flashing pink/magenta (The Ultimate Goal)
+    # Extended Colors from Nightmare Map
+    "purple": "\033[38;5;129m",  # Deep purple (Maze traps)
+    "black": "\033[30m",  # True black (Dead ends)
+    "brown": "\033[38;5;94m",  # Sandy brown (Restricted loops)
+    "maroon": "\033[38;5;88m",  # Dark maroon (Overflow hell)
+    "gold": "\033[38;5;220m",  # Bright gold (False hope priority zones)
+    "darkred": "\033[38;5;52m",  # Wine dark-red (Convergence hell)
+    "violet": "\033[38;5;135m",  # Light violet (Final merge)
+    "crimson": "\033[38;5;197m",  # Intense crimson (Final gauntlet torture)
+    "rainbow": "\033[38;5;201m",  # Neon flashing pink/magenta (The Ultimate Goal)
+    # Additional Colors (newly added)
+    "lime": "\033[38;5;82m",  # Bright lime green (Priority zones)
+    "neon": "\033[38;5;226m",  # Neon yellow (High visibility)
+    "pink": "\033[38;5;213m",  # Hot pink (Alternative highlight)
+    "turquoise": "\033[38;5;51m",  # Turquoise (Alternative cyan)
 }
+
 
 class Display:
     """Renders simulation output with colored terminal feedback."""
 
     @staticmethod
     def colorize(text: str, color_name: Optional[str]) -> str:
-
-        """Wrap text in an ANSI color code.
-        """
+        """Wrap text in an ANSI color code."""
         if not color_name:
             return text
         code = COLOR_MAP.get(color_name.lower())
@@ -51,20 +53,26 @@ class Display:
     def resolve_zone_color(zone_name: str, graph: Graph) -> Optional[str]:
         """Resolve a zone's display color, with a deterministic fallback.
 
+        Handles both zone names and connection names (zone1-zone2).
+        For connections, extracts the destination zone.
         """
+        # Check if it's a connection name (contains dash)
+        if "-" in zone_name:
+            parts = zone_name.split("-")
+            if len(parts) == 2:
+                # Get the destination zone (second part)
+                zone_name = parts[1]
+
         zone = graph.all_zones.get(zone_name)
         if not zone:
             return None
         if zone.color and zone.color.lower() in COLOR_MAP:
             return zone.color.lower()
-        palette = list(COLOR_MAP.keys())
-        return COLOR_MAP["white"]
+        return "white"
 
     @classmethod
     def display_turn_line(cls, line: str, graph: Graph) -> str:
-        """Build a colorized version of one turn's output line.
-
-        """
+        """Build a colorized version of one turn's output line."""
         if not line:
             return ""
         rendered: list[str] = []
@@ -76,7 +84,6 @@ class Display:
 
     @classmethod
     def display_full_log(cls, turn_log: list[str], graph: Graph) -> None:
-        """Print the full colorized simulation log to the terminal.
-        """
+        """Print the full colorized simulation log to the terminal."""
         for line in turn_log:
             print(cls.display_turn_line(line, graph))

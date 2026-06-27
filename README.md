@@ -115,7 +115,7 @@ connection: <zone1>-<zone2> [metadata]
 
 ### Zone Metadata Options
 
-- **`zonetype`**: Zone movement cost type
+- **`zone`**: Zone movement cost type
   - `normal` - Standard zone (1 turn movement cost, default)
   - `restricted` - 2-turn transit (drone must wait in connection for 1 turn, arrives next turn)
   - `priority` - Preferred routing (1 turn movement cost, prioritized in pathfinding tie-breaks)
@@ -152,9 +152,9 @@ connection: <zone1>-<zone2> [metadata]
 nb_drones: 3
 
 start_hub: origin 0 0 [color=green max_drones=3]
-hub: checkpoint_a 1 1 [color=blue zonetype=priority]
+hub: checkpoint_a 1 1 [color=blue zone=priority]
 hub: checkpoint_b 2 1 [color=blue max_drones=2]
-hub: restricted_zone 3 1 [color=orange zonetype=restricted]
+hub: restricted_zone 3 1 [color=orange zone=restricted]
 hub: bypass 3 2 [color=yellow]
 end_hub: destination 4 1 [color=red max_drones=3]
 

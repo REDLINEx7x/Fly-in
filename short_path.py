@@ -26,10 +26,7 @@ class Solver:
         return priority_zones + other_zones
 
     def find_path(
-        self,
-        start: Zone,
-        end: Zone,
-        exclude: set[str] | None = None
+        self, start: Zone, end: Zone, exclude: set[str] | None = None
     ) -> list[Zone]:
         """Find the shortest path from start to end using Dijkstra.
 
@@ -76,9 +73,7 @@ class Solver:
         return []
 
     def _rebuild_path(
-        self,
-        previous: dict[str, Zone],
-        current_zone: Zone
+        self, previous: dict[str, Zone], current_zone: Zone
     ) -> list[Zone]:
         """Reconstruct path by walking backwards through previous map.
 
@@ -113,9 +108,7 @@ class Solver:
         best_cost = sum(zone.movement_cost() for zone in first_path[1:])
         results: list[list[Zone]] = []
 
-        self._recursive_search(
-            start, end, [start], {start.name}, results, 0, best_cost
-        )
+        self._recursive_search(start, end, [start], {start.name}, results, 0, best_cost)
         return results
 
     def _recursive_search(
@@ -156,13 +149,3 @@ class Solver:
             )
             path.pop()
             visited.discard(neighbor.name)
-
-
-
-
-
-
-
-
-
-

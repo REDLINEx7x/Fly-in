@@ -13,6 +13,7 @@ class Flyin:
         self.parser: Parser | None = None
         self.graph: Graph | None = None
         self.simulation: SimulationManager | None = None
+
     @classmethod
     def start(cls, av: list[str]):
 
@@ -40,7 +41,6 @@ class Flyin:
         except Exception as e:
             raise ValueError(f"Parsing failed: {e}")
 
-
     def _build_graph(self):
 
         if not self.parser:
@@ -49,11 +49,10 @@ class Flyin:
             self.graph = Graph.from_parsed(self.parser)
             if not self.graph:
                 raise ValueError("Graph construction failed.")
-            solver  = Solver(self.graph)
+            solver = Solver(self.graph)
             self.simulation = SimulationManager(self.graph, solver)
         except Exception as e:
             raise ValueError(f"Graph/Solver building failed: {e}")
-
 
     def _run(self):
         turn_save = []
@@ -65,6 +64,7 @@ class Flyin:
             Display.display_full_log(turn_save, self.graph)
         except Exception as e:
             raise ValueError(f"Simulation crash: {e}")
+
 
 if __name__ == "__main__":
     Flyin.start(sys.argv)
