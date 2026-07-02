@@ -35,7 +35,8 @@ class Graph:
             logic_zones[name] = Zone.from_parsed(z)
 
         logic_connections = [
-            Connection.from_parsed(con, logic_zones) for con in parsed.connections
+            Connection.from_parsed(con, logic_zones)
+            for con in parsed.connections
         ]
         return cls(
             all_zones=logic_zones,
@@ -123,7 +124,8 @@ class Connection:
 
         if not zone_a or not zone_b:
             raise ValueError(
-                f"Connection error: One of the zones ({parsed.from_zone} or {parsed.to_zone}) not found in zone_map"
+                f"Connection error: One of the zones ({parsed.from_zone} or "
+                f"{parsed.to_zone}) not found in zone_map"
             )
         return cls(
             zone_a=zone_a,

@@ -1,0 +1,24 @@
+# Priority tiebreaker test map
+# 3 drones, two equal-cost paths: one through priority, one through normal
+# Expected: priority path should be preferred
+nb_drones: 3
+
+start_hub: start 0 0 [color=green max_drones=3]
+end_hub: goal 4 0 [color=red max_drones=3]
+
+hub: prio_a 1 0 [zone=priority color=purple]
+hub: prio_b 2 0 [zone=priority color=purple]
+hub: prio_c 3 0 [zone=priority color=purple]
+
+hub: norm_a 1 1 [color=blue]
+hub: norm_b 2 1 [color=blue]
+hub: norm_c 3 1 [color=blue]
+
+connection: start-prio_a
+connection: prio_a-prio_b
+connection: prio_b-prio_c
+connection: prio_c-goal
+connection: start-norm_a
+connection: norm_a-norm_b
+connection: norm_b-norm_c
+connection: norm_c-goal

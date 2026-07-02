@@ -21,9 +21,9 @@ class Solver:
         Sort zones to prefer priority zones first.
 
         """
-        priority_zones = [z for z in zones if z.zone_type == "priority"]
-        other_zones = [z for z in zones if z.zone_type != "priority"]
-        return priority_zones + other_zones
+        priority_zones = [z for z in zones if z.zone_type == ZoneType.PRIORITY]
+        remaning_zones = [z for z in zones if z.zone_type != ZoneType.PRIORITY]
+        return priority_zones + remaning_zones
 
     def find_path(
         self, start: Zone, end: Zone, exclude: set[str] | None = None
@@ -145,7 +145,8 @@ class Solver:
             path.append(neighbor)
             visited.add(neighbor.name)
             self._recursive_search(
-                neighbor, end, path, visited, results, new_cost, best_cost
+                neighbor, end, path, visited, results, new_cost,
+                best_cost
             )
             path.pop()
             visited.discard(neighbor.name)

@@ -1,8 +1,11 @@
-PYTHON = python3
-MAIN = fly-in.py
-MAP ?= map.txt
+PYTHON  = python3
+MAIN    = fly-in.py
+MAP    ?= map.txt
+
+all: run
 
 install:
+	@echo "Installing dependencies..."
 	@pip install -r requirements.txt
 
 run:
@@ -12,12 +15,19 @@ debug:
 	@$(PYTHON) -m pdb $(MAIN) $(MAP)
 
 clean:
+	@echo "Cleaning cache files..."
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type f -name "*.pyc" -delete
 
-lint:
-	@$(PYTHON) -m flake8 *.py --extend-ignore=E501 || true
-	@$(PYTHON) -m mypy *.py --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs || true
+fclean: clean
 
-.PHONY: install run debug clean lint
+re: fclean all
+
+lint:
+	@echo "Running Flake8..."
+	@$(PYTHON) -m flake8 . --extend-ignore=E501 || true
+	@echo "🧪 Running Mypy..."
+	@$(PYTHON) -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs || true
+
+.PHONY: all install run debug clean fclean re lint

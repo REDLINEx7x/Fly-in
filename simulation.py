@@ -1,4 +1,4 @@
-from objects import Drone, Zone, Graph, Connection
+from objects import Drone, Zone
 from validation import ZoneType
 
 
@@ -13,15 +13,11 @@ class SimulationManager:
     def setup(self):
 
         paths = self.solver.find_all_paths(self.graph.start, self.graph.end)
-        # print(len(paths))
-        # for p in paths:
-        #    print([z.name for z in p])
         for i in range(self.graph.n_drones):
             drone = Drone(drone_id=i, current_zone=self.graph.start)
             selected_path = paths[i % len(paths)]
             drone.path = list(selected_path[1:])
             self.drones.append(drone)
-        # print(id(self.drones[1].path), id(self.drones[0].path))
 
     def run_simulation(self):
 
@@ -35,7 +31,6 @@ class SimulationManager:
             full_out = self.output_line(list(output_transit + output_moves))
             self.check_deadlock(full_out)
             logs.append(full_out)
-        print(logs)
         return logs
 
     def resolve_transit(self):
@@ -60,7 +55,6 @@ class SimulationManager:
                     drone.current_zone, drone.transit_target
                 )
                 arrive_output.append(f"D{drone.drone_id}-{connection.name}")
-            # print(arrive_output)
         return arrive_output
 
     def zone_occupancy(self):
@@ -94,7 +88,9 @@ class SimulationManager:
             if next_zone == self.graph.end:
                 capacity_ok = True
             else:
-                capacity_ok = occupancy.get(next_zone.name, 0) < next_zone.max_drones
+                capacity_ok = (
+                    occupancy.get(next_zone.name, 0) < next_zone.max_drones
+                )
 
             if not capacity_ok:
                 continue
@@ -120,7 +116,6 @@ class SimulationManager:
                 occupancy.get(drone.current_zone.name, 0) - 1
             )
             con_usage[con_key] = curr_con_usage + 1
-        # print(output_str)
         return planned_moves, output_str
 
     def start_moves(self, planned_moves):
@@ -137,7 +132,6 @@ class SimulationManager:
                 drone.path.pop(0)
             if drone.current_zone == self.graph.end:
                 drone.delivered = True
-                # drone.current_zone.current_drones -= 1
 
     def output_line(self, full_output: list[str]):
 
@@ -160,5 +154,6 @@ class SimulationManager:
 
         if not is_anyone_moving and not is_everyone_delivered:
             raise ValueError(
-                "ERROR: deadlock happened - No moves possible and no drones in transit."
+                "ERROR: deadlock happened - No moves possible and no "
+                "drones in transit."
             )

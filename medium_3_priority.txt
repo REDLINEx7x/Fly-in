@@ -13,7 +13,7 @@ hub: normal_a2 3 0 [color=gray]
 hub: normal_a3 4 0 [color=gray]
 hub: normal_a4 5 0 [color=gray]
 
-hub: priority_b1 2 2 [zone=priority color=yellow]
+hub: priority_b1 2 2 [zone=blocked color=yellow]
 hub: priority_b2 3 2 [zone=priority color=yellow]
 hub: priority_b3 4 2 [zone=priority color=yellow]
 
@@ -26,6 +26,7 @@ connection: start-split
 connection: split-normal_a1
 connection: normal_a1-normal_a2
 connection: normal_a2-normal_a3
+connection: normal_a3-priority_b3
 connection: normal_a3-normal_a4
 connection: normal_a4-goal
 connection: split-priority_b1

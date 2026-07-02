@@ -35,7 +35,9 @@ class Parser:
         self.end_v: Optional[ZoneParse] = None
         self.drones_line = False
 
-    def extract_metadata(self, line: str, line_num: int) -> tuple[str, dict[str, str | int]]:
+    def extract_metadata(
+        self, line: str, line_num: int
+    ) -> tuple[str, dict[str, str | int]]:
         """Extract metadata from bracketed section of a line."""
         match = re.search(r"\[(.*?)\]", line)
         clean_line = line
@@ -49,31 +51,35 @@ class Parser:
             for item in meta_data.split():
                 if "=" not in item:
                     raise ValueError(
-                        f"Line {line_num}: Metadata format invalid for '{item}'. "
-                        "Expected 'key=value'."
+                        f"Line {line_num}: Metadata format invalid for "
+                        f"'{item}'. Expected 'key=value'."
                     )
 
                 if item.count("=") > 1:
                     raise ValueError(
-                        f"Line {line_num}: Metadata format invalid for '{item}'. "
-                        "Multiple equals signs not allowed."
+                        f"Line {line_num}: Metadata format invalid for "
+                        f"'{item}'. Multiple equals signs not allowed."
                     )
 
                 key, value = item.split("=", 1)
                 if key in metadata_dict:
                     raise ValueError(
-                        f"Line {line_num}: Duplicate metadata key '{key}'. Each key must appear only once."
+                        f"Line {line_num}: Duplicate metadata key '{key}'. "
+                        "Each key must appear only once."
                     )
                 if key not in allowed_keys:
+                    valid_keys = ", ".join(sorted(allowed_keys))
                     raise ValueError(
-                        f"Line {line_num}: Unknown metadata key '{key}'. Valid keys are: {', '.join(sorted(allowed_keys))}."
+                        f"Line {line_num}: Unknown metadata key '{key}'. "
+                        f"Valid keys are: {valid_keys}."
                     )
                 if key == "max_drones" or key == "max_link_capacity":
                     try:
                         metadata_dict[key] = int(value)
                     except ValueError:
                         raise ValueError(
-                            f"Line {line_num}: '{key}' must be a valid integer."
+                            f"Line {line_num}: '{key}' must be a valid "
+                            "integer."
                         )
                 else:
                     metadata_dict[key] = value
@@ -86,7 +92,8 @@ class Parser:
             splited = line.split(":")
             if len(splited) != 2:
                 raise ValueError(
-                    f"Line {line_num}: Invalid format. Expected 'nb_drones: <number>'."
+                    f"Line {line_num}: Invalid format. Expected "
+                    "'nb_drones: <number>'."
                 )
 
             val = splited[1].strip()
@@ -95,17 +102,21 @@ class Parser:
                 parsed_drones = DroneParse(value=drone_count)
             except ValueError:
                 raise ValueError(
-                    f"Line {line_num}: Drone count must be a valid positive integer."
+                    f"Line {line_num}: Drone count must be a valid positive "
+                    "integer."
                 )
             except ValidationError:
                 raise ValueError(
-                    f"Line {line_num}: Drone count validation failed. Must be a valid positive integer."
+                    f"Line {line_num}: Drone count validation failed. Must "
+                    "be a valid positive integer."
                 )
 
             self.drones = parsed_drones.value
             self.drones_line = True
         else:
-            raise ValueError(f"Line {line_num}: File must start with 'nb_drones:'.")
+            raise ValueError(
+                f"Line {line_num}: File must start with 'nb_drones:'."
+            )
 
     def parse_zone(self, line: str, line_num: int) -> None:
         """Parse zone definition."""
@@ -115,7 +126,8 @@ class Parser:
 
         if len(extract) != 4:
             raise ValueError(
-                f"Line {line_num}: Invalid zone format. Expected 4 tokens (type, name, x, y)."
+                f"Line {line_num}: Invalid zone format. Expected 4 tokens "
+                "(type, name, x, y)."
             )
 
         prefix = extract[0]
@@ -155,22 +167,25 @@ class Parser:
         except ValueError as e:
             if "invalid literal" in str(e):
                 raise ValueError(
-                    f"Line {line_num}: Zone coordinates must be valid integers."
+                    f"Line {line_num}: Zone coordinates must be valid "
+                    "integers."
                 )
             raise ValueError(
                 f"Line {line_num}: Zone validation failed. {e}"
             )
         except ValidationError:
             raise ValueError(
-                f"Line {line_num}: Zone validation failed. Check coordinates, types, and metadata values."
+                f"Line {line_num}: Zone validation failed. Check "
+                "coordinates, types, and metadata values."
             )
-
-        if zone.name in self.zones:
-            raise ValueError(f"Line {line_num}: Duplicate zone name '{zone.name}'.")
 
         if " " in zone.name or "-" in zone.name:
             raise ValueError(
                 f"Line {line_num}: Zone name cannot contain spaces or dashes."
+            )
+        if zone.name in self.zones:
+            raise ValueError(
+                f"Line {line_num}: Duplicate zone name '{zone.name}'."
             )
 
         self.zones[zone.name] = zone
@@ -178,14 +193,16 @@ class Parser:
         if prefix == "start_hub:":
             if self.start_v is not None:
                 raise ValueError(
-                    f"Line {line_num}: Multiple start hubs found. Only one is allowed."
+                    f"Line {line_num}: Multiple start hubs found. Only one "
+                    "is allowed."
                 )
             self.start_v = zone
 
         elif prefix == "end_hub:":
             if self.end_v is not None:
                 raise ValueError(
-                    f"Line {line_num}: Multiple end hubs found. Only one is allowed."
+                    f"Line {line_num}: Multiple end hubs found. Only one "
+                    "is allowed."
                 )
             self.end_v = zone
 
@@ -202,30 +219,35 @@ class Parser:
 
         if "-" not in parts:
             raise ValueError(
-                f"Line {line_num}: Connection format invalid '{parts}'. Expected 'zone1-zone2'."
+                f"Line {line_num}: Connection format invalid '{parts}'. "
+                "Expected 'zone1-zone2'."
             )
 
         if parts.count("-") > 1:
             raise ValueError(
-                f"Line {line_num}: Connection contains multiple dashes. Only one is allowed."
+                f"Line {line_num}: Connection contains multiple dashes. One "
+                "is allowed."
             )
 
         zon1, zon2 = parts.split("-")
 
         if zon1 not in self.zones or zon2 not in self.zones:
             raise ValueError(
-                f"Line {line_num}: Connection references an unknown zone ('{zon1}' or '{zon2}')."
+                f"Line {line_num}: Connection references an unknown zone "
+                f"('{zon1}' or '{zon2}')."
             )
 
         if zon1 == zon2:
             raise ValueError(
-                f"Line {line_num}: Self-connections are not allowed ('{zon1}')."
+                f"Line {line_num}: Self-connections are not allowed "
+                f"('{zon1}')."
             )
 
         current_pair = frozenset({zon1, zon2})
         if current_pair in self.seen_connections:
             raise ValueError(
-                f"Line {line_num}: Duplicate connection detected between '{zon1}' and '{zon2}'."
+                f"Line {line_num}: Duplicate connection detected between "
+                f"'{zon1}' and '{zon2}'."
             )
 
         self.seen_connections.add(current_pair)
@@ -237,14 +259,16 @@ class Parser:
                 if key == "max_link_capacity" and isinstance(value, int):
                     max_link_capacity = value
 
-            metadata_obj = ConnectionMetadata(max_link_capacity=max_link_capacity)
+            metadata_obj = ConnectionMetadata(
+                max_link_capacity=max_link_capacity
+            )
             connection = ConnectionParse(
                 from_zone=zon1, to_zone=zon2, metadata=metadata_obj
             )
         except ValidationError:
-            # Removed {e}. Replaced with a clean, descriptive message.
             raise ValueError(
-                f"Line {line_num}: Connection validation failed. Check metadata values (e.g., max_link_capacity)."
+                f"Line {line_num}: Connection validation failed. Check "
+                "metadata values (e.g., max_link_capacity)."
             )
 
         self.connections.append(connection)
@@ -269,15 +293,18 @@ class Parser:
 
                 else:
                     raise ValueError(
-                        f"Line {line_num}: Unrecognized configuration format."
+                        f"Line {line_num}: Unrecognized configuration "
+                        "format."
                     )
 
         if self.start_v is None or self.end_v is None:
             raise ValueError(
-                "Invalid Map: Missing 'start_hub' or 'end_hub' in the configuration."
+                "Invalid Map: Missing 'start_hub' or 'end_hub' in the "
+                "configuration."
             )
 
         if not self.zones or not self.connections:
             raise ValueError(
-                "Invalid Map: Configuration must have at least one zone and one connection."
+                "Invalid Map: Configuration must have at least one zone and "
+                "one connection."
             )

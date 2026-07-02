@@ -1,7 +1,5 @@
 """Display utilities for colored terminal output of the simulation."""
-
 from typing import Optional
-
 from objects import Graph
 
 RESET: str = "\033[0m"
@@ -23,11 +21,11 @@ COLOR_MAP: dict[str, str] = {
     "black": "\033[30m",  # True black (Dead ends)
     "brown": "\033[38;5;94m",  # Sandy brown (Restricted loops)
     "maroon": "\033[38;5;88m",  # Dark maroon (Overflow hell)
-    "gold": "\033[38;5;220m",  # Bright gold (False hope priority zones)
+    "gold": "\033[38;5;220m",  # Bright gold (False hope priority)
     "darkred": "\033[38;5;52m",  # Wine dark-red (Convergence hell)
     "violet": "\033[38;5;135m",  # Light violet (Final merge)
-    "crimson": "\033[38;5;197m",  # Intense crimson (Final gauntlet torture)
-    "rainbow": "\033[38;5;201m",  # Neon flashing pink/magenta (The Ultimate Goal)
+    "crimson": "\033[38;5;197m",  # Intense crimson (Final gauntlet)
+    "rainbow": "\033[38;5;201m",  # Neon flashing pink (Ultimate Goal)
     # Additional Colors (newly added)
     "lime": "\033[38;5;82m",  # Bright lime green (Priority zones)
     "neon": "\033[38;5;226m",  # Neon yellow (High visibility)
