@@ -98,16 +98,12 @@ make clean         # Clean cache and virtual environment
 
 ### AI Usage
 
-Claude (Anthropic) was used throughout this project for the following tasks:
+AI was used throughout this project for the following tasks:
 
 - **Architecture design**: Discussing OOP structure, layer separation, and class responsibilities before writing any code
-- **Algorithm logic**: Explaining the Dijkstra + cost-pruned DFS hybrid approach and reasoning through edge cases (e.g., chokepoint topologies, shared paths, backtracking correctness)
+- **Algorithm logic**: Explaining the Dijkstra + cost-pruned DFS hybrid approach and reasoning through edge cases
 - **Bug investigation**: Reviewing code for logic errors across all layers — parser, domain objects, pathfinder, and simulator
-- **Validation layer**: Designing the Pydantic model structure and catching constraint gaps (e.g., missing `ge=0` on coordinates)
 - **Test asset generation**: Generating the 10 benchmark map files and the test runner script
-- **Documentation**: Drafting and refining this README
-
-All AI-generated content was reviewed, understood, and validated before being incorporated into the project.
 
 ---
 

@@ -1,33 +1,25 @@
-PYTHON  = python3
-MAIN    = fly-in.py
-MAP    ?= map.txt
-
-all: run
+PYTHON = python3
+FILE ?= map.txt
 
 install:
-	@echo "Installing dependencies..."
-	@pip install -r requirements.txt
+	pip install pydantic flake8 mypy
 
 run:
-	@$(PYTHON) $(MAIN) $(MAP) || true
+	$(PYTHON) fly-in.py $(FILE)
 
 debug:
-	@$(PYTHON) -m pdb $(MAIN) $(MAP)
+	$(PYTHON) -m pdb fly-in.py $(FILE)
 
 clean:
-	@echo "Cleaning cache files..."
-	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type f -name "*.pyc" -delete
-
-fclean: clean
-
-re: fclean all
+	rm -rf __pycache__ .mypy_cache
+	find . -type d -name __pycache__ -exec rm -rf {} +
 
 lint:
-	@echo "Running Flake8..."
-	@$(PYTHON) -m flake8 . --extend-ignore=E501 || true
-	@echo "🧪 Running Mypy..."
-	@$(PYTHON) -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs || true
+	flake8 .
+	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
-.PHONY: all install run debug clean fclean re lint
+lint-strict:
+	flake8 .
+	mypy . --strict
+
+.PHONY: install run debug clean lint lint-strict

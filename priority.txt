@@ -8,7 +8,7 @@ end_hub: goal 4 0 [color=red max_drones=3]
 
 hub: prio_a 1 0 [zone=priority color=purple]
 hub: prio_b 2 0 [zone=priority color=purple]
-hub: prio_c 3 0 [zone=priority color=purple]
+hub: prio_c 3 0 [zone= color=purple]
 
 hub: norm_a 1 1 [color=blue]
 hub: norm_b 2 1 [color=blue]

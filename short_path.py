@@ -26,7 +26,7 @@ class Solver:
         return priority_zones + remaning_zones
 
     def find_path(
-        self, start: Zone, end: Zone, exclude: set[str] | None = None
+        self, start: Zone, end: Zone,
     ) -> list[Zone]:
         """Find the shortest path from start to end using Dijkstra.
 
@@ -38,8 +38,6 @@ class Solver:
         Returns:
             Ordered list of zones from start to end, or empty if none found.
         """
-        if exclude is None:
-            exclude = set()
 
         dist_cost: dict[str, float] = {
             zone_name: float("inf") for zone_name in self.graph.all_zones
@@ -62,8 +60,6 @@ class Solver:
             sort_neibghbors = self.priority_sort(neighbors)
 
             for neighbor in sort_neibghbors:
-                if neighbor.name in exclude:
-                    continue
                 new_cost = curr_cost + neighbor.movement_cost()
                 if new_cost < dist_cost[neighbor.name]:
                     dist_cost[neighbor.name] = new_cost
@@ -108,7 +104,9 @@ class Solver:
         best_cost = sum(zone.movement_cost() for zone in first_path[1:])
         results: list[list[Zone]] = []
 
-        self._recursive_search(start, end, [start], {start.name}, results, 0, best_cost)
+        self._recursive_search(
+            start, end, [start], {start.name}, results, 0, best_cost
+        )
         return results
 
     def _recursive_search(

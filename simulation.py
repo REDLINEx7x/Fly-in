@@ -1,16 +1,17 @@
-from objects import Drone, Zone
+from objects import Drone, Zone, Graph
+from short_path import Solver
 from validation import ZoneType
 
 
 class SimulationManager:
 
-    def __init__(self, graph, solver):
+    def __init__(self, graph: Graph, solver: Solver) -> None:
 
         self.graph = graph
         self.drones: list[Drone] = []
         self.solver = solver
 
-    def setup(self):
+    def setup(self) -> None:
 
         paths = self.solver.find_all_paths(self.graph.start, self.graph.end)
         for i in range(self.graph.n_drones):
@@ -19,7 +20,7 @@ class SimulationManager:
             drone.path = list(selected_path[1:])
             self.drones.append(drone)
 
-    def run_simulation(self):
+    def run_simulation(self) -> list[str]:
 
         self.setup()
         logs = []
@@ -33,7 +34,7 @@ class SimulationManager:
             logs.append(full_out)
         return logs
 
-    def resolve_transit(self):
+    def resolve_transit(self) -> list[str]:
 
         arrive_output = []
         for drone in self.drones:
@@ -41,6 +42,8 @@ class SimulationManager:
                 continue
             drone.transit_turns_left -= 1
             if drone.transit_turns_left == 0:
+                if drone.transit_target is None:
+                    continue
                 drone.current_zone = drone.transit_target
                 drone.in_transit = False
                 drone.transit_target = None
@@ -48,16 +51,24 @@ class SimulationManager:
                     drone.delivered = True
                 if drone.current_zone == self.graph.end:
                     drone.delivered = True
-                arrive_output.append(f"D{drone.drone_id}-{drone.current_zone.name}")
+                arrive_output.append(
+                    f"D{drone.drone_id}-{drone.current_zone.name}"
+                )
                 drone.transit_target = None
             else:
+                if drone.transit_target is None:
+                    continue
                 connection = self.graph.get_connection(
                     drone.current_zone, drone.transit_target
                 )
-                arrive_output.append(f"D{drone.drone_id}-{connection.name}")
+                if connection is None:
+                    continue
+                arrive_output.append(
+                    f"D{drone.drone_id}-{connection.name}"
+                )
         return arrive_output
 
-    def zone_occupancy(self):
+    def zone_occupancy(self) -> dict[str, int]:
 
         occupancy: dict[str, int] = {}
         for drone in self.drones:
@@ -75,7 +86,7 @@ class SimulationManager:
 
         planned_moves: list[tuple[Drone, Zone]] = []
         output_str: list[str] = []
-        con_usage: dict[frozenset, int] = {}
+        con_usage: dict[frozenset[str], int] = {}
 
         for drone in self.drones:
             if drone.in_transit or drone.delivered:
@@ -118,7 +129,9 @@ class SimulationManager:
             con_usage[con_key] = curr_con_usage + 1
         return planned_moves, output_str
 
-    def start_moves(self, planned_moves):
+    def start_moves(
+        self, planned_moves: list[tuple[Drone, Zone]]
+    ) -> None:
 
         for drone, next_zone in planned_moves:
             drone.current_zone.current_drones -= 1
@@ -133,7 +146,7 @@ class SimulationManager:
             if drone.current_zone == self.graph.end:
                 drone.delivered = True
 
-    def output_line(self, full_output: list[str]):
+    def output_line(self, full_output: list[str]) -> str:
 
         if not full_output:
             return ""

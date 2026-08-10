@@ -4,22 +4,29 @@ from validation import ZoneParse, ConnectionParse, ZoneType
 
 class Drone:
 
-    def __init__(self, drone_id, current_zone):
+    def __init__(self, drone_id: int, current_zone: "Zone") -> None:
         self.drone_id = drone_id
         self.current_zone: Zone = current_zone
         self.path: list[Zone] = []
         self.in_transit: bool = False
         self.transit_turns_left: int = 0
         self.delivered: bool = False
-        self.transit_target: Zone | None
+        self.transit_target: Zone | None = None
 
-    def has_arrived(self, end_zone):
+    def has_arrived(self, end_zone: "Zone") -> bool:
         return self.current_zone == end_zone
 
 
 class Graph:
 
-    def __init__(self, all_zones, connections, start, end, n_drones):
+    def __init__(
+        self,
+        all_zones: dict[str, "Zone"],
+        connections: list["Connection"],
+        start: "Zone",
+        end: "Zone",
+        n_drones: int,
+    ) -> None:
 
         self.all_zones = all_zones
         self.connections = connections
@@ -38,6 +45,8 @@ class Graph:
             Connection.from_parsed(con, logic_zones)
             for con in parsed.connections
         ]
+        if parsed.start_v is None or parsed.end_v is None:
+            raise ValueError("Start or end zone is missing")
         return cls(
             all_zones=logic_zones,
             connections=logic_connections,
@@ -46,21 +55,23 @@ class Graph:
             n_drones=parsed.drones,
         )
 
-    def get_neighbors(self, zone):
+    def get_neighbors(self, zone: "Zone") -> list["Zone"]:
 
         good_neighbors = []
 
         for con in self.connections:
             if con.connected(zone):
                 finded = con.find_other(zone)
-                if not finded.is_blocked():
+                if finded and not finded.is_blocked():
                     good_neighbors.append(finded)
                 else:
                     continue
 
         return good_neighbors
 
-    def get_connection(self, a, b):
+    def get_connection(
+        self, a: "Zone", b: "Zone"
+    ) -> "Connection | None":
 
         for con in self.connections:
             if con.connected(a) and con.connected(b):
@@ -70,7 +81,15 @@ class Graph:
 
 class Zone:
 
-    def __init__(self, name, x, y, zone_type, color, max_drones):
+    def __init__(
+        self,
+        name: str,
+        x: int,
+        y: int,
+        zone_type: ZoneType,
+        color: str | None,
+        max_drones: int,
+    ) -> None:
 
         self.name = name
         self.zone_type = zone_type
@@ -104,7 +123,9 @@ class Zone:
 
 class Connection:
 
-    def __init__(self, zone_a, zone_b, max_link_capacity):
+    def __init__(
+        self, zone_a: "Zone", zone_b: "Zone", max_link_capacity: int
+    ) -> None:
 
         self.zone_a = zone_a
         self.zone_b = zone_b
@@ -116,7 +137,7 @@ class Connection:
 
     @classmethod
     def from_parsed(
-        cls, parsed: ConnectionParse, zone_map: dict[str, Zone]
+        cls, parsed: ConnectionParse, zone_map: dict[str, "Zone"]
     ) -> "Connection":
 
         zone_a = zone_map.get(parsed.from_zone)
@@ -133,13 +154,13 @@ class Connection:
             max_link_capacity=parsed.metadata.max_link_capacity,
         )
 
-    def connected(self, zone):
+    def connected(self, zone: "Zone") -> bool:
 
         if zone == self.zone_a or zone == self.zone_b:
             return True
         return False
 
-    def find_other(self, zone):
+    def find_other(self, zone: "Zone") -> "Zone | None":
 
         if zone == self.zone_a:
             return self.zone_b

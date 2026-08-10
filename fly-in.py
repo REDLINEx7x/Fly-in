@@ -7,7 +7,7 @@ from objects import Graph
 
 
 class Flyin:
-    def __init__(self, filepath):
+    def __init__(self, filepath: str) -> None:
 
         self.filepath = filepath
         self.parser: Parser | None = None
@@ -15,7 +15,7 @@ class Flyin:
         self.simulation: SimulationManager | None = None
 
     @classmethod
-    def start(cls, av: list[str]):
+    def start(cls, av: list[str]) -> None:
 
         try:
             if len(av) == 2:
@@ -31,7 +31,7 @@ class Flyin:
             print(f"Application Error: {e}")
             sys.exit(1)
 
-    def _parse(self):
+    def _parse(self) -> None:
 
         try:
             self.parser = Parser(self.filepath)
@@ -41,7 +41,7 @@ class Flyin:
         except Exception as e:
             raise ValueError(f"Parsing failed: {e}")
 
-    def _build_graph(self):
+    def _build_graph(self) -> None:
 
         if not self.parser:
             raise ValueError("Parser is not initialized.")
@@ -54,13 +54,14 @@ class Flyin:
         except Exception as e:
             raise ValueError(f"Graph/Solver building failed: {e}")
 
-    def _run(self):
-        turn_save = []
+    def _run(self) -> None:
         if not self.simulation:
             raise ValueError("Simulation is not initialized.")
 
         try:
             turn_save = self.simulation.run_simulation()
+            if self.graph is None:
+                raise ValueError("Graph is not initialized.")
             Display.display_full_log(turn_save, self.graph)
         except Exception as e:
             raise ValueError(f"Simulation crash: {e}")
