@@ -13,7 +13,10 @@ class SimulationManager:
 
     def setup(self) -> None:
 
+
         paths = self.solver.find_all_paths(self.graph.start, self.graph.end)
+        if not paths :
+            raise ValueError("No valid path found from start to goal. The map is disconnected.")
         for i in range(self.graph.n_drones):
             drone = Drone(drone_id=i, current_zone=self.graph.start)
             selected_path = paths[i % len(paths)]
@@ -54,7 +57,6 @@ class SimulationManager:
                 arrive_output.append(
                     f"D{drone.drone_id}-{drone.current_zone.name}"
                 )
-                drone.transit_target = None
             else:
                 if drone.transit_target is None:
                     continue
@@ -134,7 +136,6 @@ class SimulationManager:
     ) -> None:
 
         for drone, next_zone in planned_moves:
-            drone.current_zone.current_drones -= 1
             if next_zone.zone_type == ZoneType.RESTRICTED:
                 drone.in_transit = True
                 drone.transit_turns_left = 1
