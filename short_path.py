@@ -22,8 +22,8 @@ class Solver:
 
         """
         priority_zones = [z for z in zones if z.zone_type == ZoneType.PRIORITY]
-        remaning_zones = [z for z in zones if z.zone_type != ZoneType.PRIORITY]
-        return priority_zones + remaning_zones
+        remaining_zones = [z for z in zones if z.zone_type != ZoneType.PRIORITY]
+        return priority_zones + remaining_zones
 
     def find_path(
         self, start: Zone, end: Zone,
@@ -33,7 +33,6 @@ class Solver:
         Args:
             start: The starting zone.
             end: The destination zone.
-            exclude: Zone names to skip during search.
 
         Returns:
             Ordered list of zones from start to end, or empty if none found.
@@ -50,16 +49,16 @@ class Solver:
             curr_cost, curr_zone_name = heapq.heappop(queue)
             curr_zone = self.graph.all_zones[curr_zone_name]
 
-            if curr_zone == end:
+            if curr_zone_name == end.name:
                 return self._rebuild_path(previous, curr_zone)
 
             if curr_cost > dist_cost[curr_zone_name]:
                 continue
 
             neighbors = [n for n in self.graph.get_neighbors(curr_zone)]
-            sort_neibghbors = self.priority_sort(neighbors)
+            sorted_neighbors = self.priority_sort(neighbors)
 
-            for neighbor in sort_neibghbors:
+            for neighbor in sorted_neighbors:
                 new_cost = curr_cost + neighbor.movement_cost()
                 if new_cost < dist_cost[neighbor.name]:
                     dist_cost[neighbor.name] = new_cost
@@ -105,7 +104,7 @@ class Solver:
         results: list[list[Zone]] = []
 
         self._recursive_search(
-            start, end, [start], {start.name}, results, 0, best_cost
+            start, end, [start], {start.name}, results, 0.0, best_cost
         )
         return results
 
@@ -116,8 +115,8 @@ class Solver:
         path: list[Zone],
         visited: set[str],
         results: list[list[Zone]],
-        cur_cost: int,
-        best_cost: int,
+        cur_cost: float,
+        best_cost: float,
     ) -> None:
         """Recursively explore paths, pruning branches that exceed best cost.
 
@@ -130,7 +129,7 @@ class Solver:
             cur_cost: Accumulated cost so far.
             best_cost: Maximum allowed cost — prune if exceeded.
         """
-        if current == end:
+        if current.name == end.name:
             results.append(list(path))
             return
 

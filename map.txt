@@ -1,28 +1,6 @@
-# Map Test: Disconnected Graph / Unreachable Goal
-# Expected behavior: The parser or solver should raise an Error stating no paths exist.
-
-nb_drones: 5
-
-start_hub: start 0 0 [color=green max_drones=5]
-hub: city_a 1 0 [color=blue]
-hub: city_b 2 0 [color=blue]
-hub: bridge_left 3 0 [color=orange zone=restricted]
-
-# --- THE GAP (Missing connection here) ---
-
-hub: bridge_right 5 0 [color=orange zone=restricted]
-hub: forest_path 6 0 [color=green]
-hub: city_c 7 0 [color=blue]
-end_hub: goal 8 0 [color=red max_drones=5]
-
-# Valid connections on the left side
-connection: start-city_a
-connection: city_a-city_b
-connection: city_b-bridge_left
-
-# Valid connections on the right side
-connection: bridge_right-forest_path
-connection: forest_path-city_c
-connection: city_c-goal
-
-# Notice: There is NO connection: bridge_left-bridge_right
+nb_drones: 10:extra
+start_hub: start 0 0
+hub: middle 1 0
+end_hub: goal 2 0
+connection: start-middle
+connection: middle-goal
