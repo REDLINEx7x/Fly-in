@@ -54,11 +54,10 @@ class Display:
         Handles both zone names and connection names (zone1-zone2).
         For connections, extracts the destination zone.
         """
-        # Check if it's a connection name (contains dash)
         if "-" in zone_name:
             parts = zone_name.split("-")
             if len(parts) == 2:
-                # Get the destination zone (second part)
+
                 zone_name = parts[1]
 
         zone = graph.all_zones.get(zone_name)

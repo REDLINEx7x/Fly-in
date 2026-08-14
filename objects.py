@@ -1,8 +1,11 @@
+"""Core domain objects for the Fly-in simulation."""
+
 from map_parser import Parser
 from validation import ZoneParse, ConnectionParse, ZoneType
 
 
 class Drone:
+    """Represent one drone and its current routing state."""
 
     def __init__(self, drone_id: int, current_zone: "Zone") -> None:
         self.drone_id = drone_id
@@ -14,10 +17,13 @@ class Drone:
         self.transit_target: Zone | None = None
 
     def has_arrived(self, end_zone: "Zone") -> bool:
+        """Check whether the drone is currently at the destination zone."""
+
         return self.current_zone == end_zone
 
 
 class Graph:
+    """Hold the parsed zone graph, start and end points, and drones."""
 
     def __init__(
         self,
@@ -36,6 +42,7 @@ class Graph:
 
     @classmethod
     def from_parsed(cls, parsed: Parser) -> "Graph":
+        """Build the runtime graph from parsed map data."""
 
         logic_zones = {}
         for name, z in parsed.zones.items():
@@ -56,6 +63,7 @@ class Graph:
         )
 
     def get_neighbors(self, zone: "Zone") -> list["Zone"]:
+        """Return reachable non-blocked neighboring zones."""
 
         good_neighbors = []
 
@@ -72,6 +80,7 @@ class Graph:
     def get_connection(
         self, a: "Zone", b: "Zone"
     ) -> "Connection | None":
+        """Return the connection shared by two zones, if it exists."""
 
         for con in self.connections:
             if con.connected(a) and con.connected(b):
@@ -80,6 +89,7 @@ class Graph:
 
 
 class Zone:
+    """Represent a traversable zone with type, position, and capacity."""
 
     def __init__(
         self,
@@ -101,6 +111,7 @@ class Zone:
 
     @classmethod
     def from_parsed(cls, parsed: ZoneParse) -> "Zone":
+        """Convert parsed zone metadata into a runtime zone object."""
 
         return cls(
             name=parsed.name,
@@ -112,6 +123,8 @@ class Zone:
         )
 
     def is_blocked(self) -> bool:
+        """Check whether this zone is inaccessible."""
+
         return self.zone_type == ZoneType.BLOCKED
 
     def movement_cost(self) -> int:
@@ -122,6 +135,7 @@ class Zone:
 
 
 class Connection:
+    """Represent an undirected link between two zones."""
 
     def __init__(
         self, zone_a: "Zone", zone_b: "Zone", max_link_capacity: int
@@ -139,6 +153,7 @@ class Connection:
     def from_parsed(
         cls, parsed: ConnectionParse, zone_map: dict[str, "Zone"]
     ) -> "Connection":
+        """Create a runtime connection from parsed endpoints."""
 
         zone_a = zone_map.get(parsed.from_zone)
         zone_b = zone_map.get(parsed.to_zone)
@@ -155,12 +170,14 @@ class Connection:
         )
 
     def connected(self, zone: "Zone") -> bool:
+        """Check whether the given zone is one endpoint of this link."""
 
         if zone == self.zone_a or zone == self.zone_b:
             return True
         return False
 
     def find_other(self, zone: "Zone") -> "Zone | None":
+        """Return the opposite endpoint for a connected zone."""
 
         if zone == self.zone_a:
             return self.zone_b

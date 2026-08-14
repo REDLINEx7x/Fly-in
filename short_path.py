@@ -17,13 +17,18 @@ class Solver:
         self.graph = graph
 
     def priority_sort(self, zones: list[Zone]) -> list[Zone]:
-        """
-        Sort zones to prefer priority zones first.
-
-        """
-        priority_zones = [z for z in zones if z.zone_type == ZoneType.PRIORITY]
-        remaining_zones = [z for z in zones if z.zone_type != ZoneType.PRIORITY]
+        """Return zones ordered with priority zones first."""
+        priority_zones = [
+            z for z in zones if z.zone_type == ZoneType.PRIORITY
+        ]
+        remaining_zones = [
+            z for z in zones if z.zone_type != ZoneType.PRIORITY
+        ]
         return priority_zones + remaining_zones
+
+    def _priority_penalty(self, zone: Zone) -> int:
+        """Return a tie-break penalty for non-priority zones."""
+        return 0 if zone.zone_type == ZoneType.PRIORITY else 1
 
     def find_path(
         self, start: Zone, end: Zone,
@@ -38,21 +43,22 @@ class Solver:
             Ordered list of zones from start to end, or empty if none found.
         """
 
-        dist_cost: dict[str, float] = {
-            zone_name: float("inf") for zone_name in self.graph.all_zones
+        dist_cost: dict[str, tuple[float, int]] = {
+            zone_name: (float("inf"), float("inf"))
+            for zone_name in self.graph.all_zones
         }
-        dist_cost[start.name] = 0
+        dist_cost[start.name] = (0, 0)
         previous: dict[str, Zone] = {}
-        queue: list[tuple[float, str]] = [(0, start.name)]
+        queue: list[tuple[float, int, str]] = [(0, 0, start.name)]
 
         while queue:
-            curr_cost, curr_zone_name = heapq.heappop(queue)
+            curr_cost, curr_priority, curr_zone_name = heapq.heappop(queue)
             curr_zone = self.graph.all_zones[curr_zone_name]
 
             if curr_zone_name == end.name:
                 return self._rebuild_path(previous, curr_zone)
 
-            if curr_cost > dist_cost[curr_zone_name]:
+            if (curr_cost, curr_priority) > dist_cost[curr_zone_name]:
                 continue
 
             neighbors = [n for n in self.graph.get_neighbors(curr_zone)]
@@ -60,10 +66,13 @@ class Solver:
 
             for neighbor in sorted_neighbors:
                 new_cost = curr_cost + neighbor.movement_cost()
-                if new_cost < dist_cost[neighbor.name]:
-                    dist_cost[neighbor.name] = new_cost
+                new_priority = curr_priority + self._priority_penalty(neighbor)
+                if (new_cost, new_priority) < dist_cost[neighbor.name]:
+                    dist_cost[neighbor.name] = (new_cost, new_priority)
                     previous[neighbor.name] = curr_zone
-                    heapq.heappush(queue, (new_cost, neighbor.name))
+                    heapq.heappush(
+                        queue, (new_cost, new_priority, neighbor.name)
+                    )
 
         return []
 

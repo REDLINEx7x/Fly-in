@@ -1,9 +1,12 @@
+"""Simulation engine for turn-based drone movement."""
+
 from objects import Drone, Zone, Graph
 from short_path import Solver
 from validation import ZoneType
 
 
 class SimulationManager:
+    """Plan and execute drone moves until all drones reach the goal."""
 
     def __init__(self, graph: Graph, solver: Solver) -> None:
 
@@ -12,11 +15,13 @@ class SimulationManager:
         self.solver = solver
 
     def setup(self) -> None:
-
-
+        """Assign one optimal path to each drone before simulation."""
         paths = self.solver.find_all_paths(self.graph.start, self.graph.end)
-        if not paths :
-            raise ValueError("No valid path found from start to goal. The map is disconnected.")
+        if not paths:
+            raise ValueError(
+                "No valid path found from start to goal. The map is "
+                "disconnected."
+            )
         for i in range(self.graph.n_drones):
             drone = Drone(drone_id=i, current_zone=self.graph.start)
             selected_path = paths[i % len(paths)]
@@ -24,6 +29,7 @@ class SimulationManager:
             self.drones.append(drone)
 
     def run_simulation(self) -> list[str]:
+        """Run turns until every drone has reached the goal."""
 
         self.setup()
         logs = []
@@ -39,6 +45,7 @@ class SimulationManager:
         return logs
 
     def resolve_transit(self) -> tuple[list[str], set[int]]:
+        """Advance drones already in transit and collect output tokens."""
 
         arrive_output = []
         just_arrived: set[int] = set()
@@ -54,7 +61,6 @@ class SimulationManager:
                 drone.transit_target = None
                 if drone.has_arrived(self.graph.end):
                     drone.delivered = True
-                # compare by name to avoid relying on Zone.__eq__ semantics
                 if drone.current_zone.name == self.graph.end.name:
                     drone.delivered = True
                 just_arrived.add(drone.drone_id)
@@ -75,6 +81,7 @@ class SimulationManager:
         return arrive_output, just_arrived
 
     def zone_occupancy(self) -> dict[str, int]:
+        """Count drones currently occupying each zone."""
 
         occupancy: dict[str, int] = {}
         for drone in self.drones:
@@ -89,6 +96,7 @@ class SimulationManager:
     def decide_moves(
         self, occupancy: dict[str, int], just_arrived: set[int]
     ) -> tuple[list[tuple[Drone, Zone]], list[str]]:
+        """Choose legal moves for the current turn."""
 
         planned_moves: list[tuple[Drone, Zone]] = []
         output_str: list[str] = []
@@ -96,7 +104,9 @@ class SimulationManager:
 
         for drone in self.drones:
             if drone.in_transit and drone.transit_target is not None:
-                con_key = frozenset({drone.current_zone.name, drone.transit_target.name})
+                con_key = frozenset(
+                    {drone.current_zone.name, drone.transit_target.name}
+                )
                 con_usage[con_key] = con_usage.get(con_key, 0) + 1
 
         for drone in self.drones:
@@ -109,7 +119,6 @@ class SimulationManager:
 
             next_zone = drone.path[0]
 
-            # compare by name to avoid relying on object equality
             if next_zone.name == self.graph.end.name:
                 capacity_ok = True
             else:
@@ -136,9 +145,7 @@ class SimulationManager:
                 output_str.append(f"D{drone.drone_id}-{next_zone.name}")
 
             planned_moves.append((drone, next_zone))
-            # increment destination occupancy
             occupancy[next_zone.name] = occupancy.get(next_zone.name, 0) + 1
-            # safely decrement origin occupancy and remove when empty
             origin = drone.current_zone.name
             origin_count = occupancy.get(origin, 0) - 1
             if origin_count <= 0:
@@ -151,6 +158,7 @@ class SimulationManager:
     def start_moves(
         self, planned_moves: list[tuple[Drone, Zone]]
     ) -> None:
+        """Apply the planned moves to the drone states."""
 
         for drone, next_zone in planned_moves:
             if next_zone.zone_type == ZoneType.RESTRICTED:
@@ -165,6 +173,7 @@ class SimulationManager:
                 drone.delivered = True
 
     def output_line(self, full_output: list[str]) -> str:
+        """Join one turn's tokens into the output line format."""
 
         if not full_output:
             return ""

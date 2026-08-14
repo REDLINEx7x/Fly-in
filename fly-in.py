@@ -1,3 +1,5 @@
+"""Application entry point for the Fly-in simulation."""
+
 import sys
 from terminal_output import Display
 from map_parser import Parser
@@ -7,7 +9,10 @@ from objects import Graph
 
 
 class Flyin:
+    """Coordinate parsing, graph construction, and simulation output."""
+
     def __init__(self, filepath: str) -> None:
+        """Store the input map path and initialize runtime state."""
 
         self.filepath = filepath
         self.parser: Parser | None = None
@@ -16,6 +21,7 @@ class Flyin:
 
     @classmethod
     def start(cls, av: list[str]) -> None:
+        """Parse command-line arguments and launch the simulation."""
 
         try:
             if len(av) == 2:
@@ -32,6 +38,7 @@ class Flyin:
             sys.exit(1)
 
     def _parse(self) -> None:
+        """Load and validate the input map file."""
 
         try:
             self.parser = Parser(self.filepath)
@@ -42,6 +49,7 @@ class Flyin:
             raise ValueError(f"Parsing failed: {e}")
 
     def _build_graph(self) -> None:
+        """Convert parsed data into the runtime graph and solver."""
 
         if not self.parser:
             raise ValueError("Parser is not initialized.")
@@ -55,6 +63,8 @@ class Flyin:
             raise ValueError(f"Graph/Solver building failed: {e}")
 
     def _run(self) -> None:
+        """Execute the simulation and print the formatted turn log."""
+
         if not self.simulation:
             raise ValueError("Simulation is not initialized.")
 

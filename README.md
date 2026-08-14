@@ -26,14 +26,13 @@ The system combines advanced pathfinding algorithms (Dijkstra's algorithm for op
 
 ### Installation
 
-Install the project with all dependencies:
+Install the project dependencies:
 
 ```bash
 make install
 ```
 
 This command:
-- Creates a Python virtual environment (`venv/`)
 - Installs core dependencies: `pydantic` (data validation)
 - Installs development tools: `flake8` (linting), `mypy` (type checking)
 
@@ -69,6 +68,26 @@ D0-goal D1-goal D2-goal
 - Delivered drones are no longer tracked in output
 - Simulation terminates once all drones reach the goal
 
+### Usage Example
+
+Example input map:
+
+```txt
+nb_drones: 1
+start_hub: start 0 0
+hub: middle 1 0
+end_hub: goal 2 0
+connection: start-middle
+connection: middle-goal
+```
+
+Expected output:
+
+```txt
+D0-middle
+D0-goal
+```
+
 ### Code Quality Verification
 
 Run linting and type-checking:
@@ -100,10 +119,10 @@ make clean         # Clean cache and virtual environment
 
 AI was used throughout this project for the following tasks:
 
-- **Architecture design**: Discussing OOP structure, layer separation, and class responsibilities before writing any code
-- **Algorithm logic**: Explaining the Dijkstra + cost-pruned DFS hybrid approach and reasoning through edge cases
-- **Bug investigation**: Reviewing code for logic errors across all layers — parser, domain objects, pathfinder, and simulator
-- **Test asset generation**: Generating the 10 benchmark map files and the test runner script
+- **Architecture design**: Discussing the OOP structure and responsibility split across [objects.py](objects.py), [short_path.py](short_path.py), and [simulation.py](simulation.py) before writing code
+- **Algorithm logic**: Explaining the Dijkstra + cost-pruned DFS hybrid approach and reasoning through edge cases in the pathfinder
+- **Bug investigation**: Reviewing logic errors across the parser, validation, graph model, and simulation flow
+- **Test asset generation**: Generating the benchmark map files in [maps/](maps/) and the test runner script [test.sh](test.sh)
 
 ---
 
