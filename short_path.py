@@ -43,7 +43,7 @@ class Solver:
             Ordered list of zones from start to end, or empty if none found.
         """
 
-        dist_cost: dict[str, tuple[float, int]] = {
+        dist_cost: dict[str, tuple[float, float]] = {
             zone_name: (float("inf"), float("inf"))
             for zone_name in self.graph.all_zones
         }
