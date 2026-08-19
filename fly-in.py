@@ -24,14 +24,18 @@ class Flyin:
         """Parse command-line arguments and launch the simulation."""
 
         try:
+            visual = "--visual" in av
+            if visual:
+                av = [a for a in av if a != "--visual"]
+
             if len(av) == 2:
                 filepath = av[1]
                 main = Flyin(filepath)
                 main._parse()
                 main._build_graph()
-                main._run()
+                main._run(visual=visual)
             else:
-                print("Usage: python3 main.py <map_filepath>")
+                print("Usage: python3 main.py <map_filepath> [--visual]")
                 sys.exit(1)
         except Exception as e:
             print(f"Application Error: {e}")
@@ -62,7 +66,7 @@ class Flyin:
         except Exception as e:
             raise ValueError(f"Graph/Solver building failed: {e}")
 
-    def _run(self) -> None:
+    def _run(self, visual: bool = False) -> None:
         """Execute the simulation and print the formatted turn log."""
 
         if not self.simulation:
@@ -73,6 +77,11 @@ class Flyin:
             if self.graph is None:
                 raise ValueError("Graph is not initialized.")
             Display.display_full_log(turn_save, self.graph)
+
+            if visual:
+                from visualizer import Visualizer
+                viz = Visualizer(self.graph)
+                viz.run(turn_save)
         except Exception as e:
             raise ValueError(f"Simulation crash: {e}")
 
